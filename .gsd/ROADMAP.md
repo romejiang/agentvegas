@@ -19,7 +19,7 @@
 **Requirements**: REQ-01, REQ-02
 
 ### Phase 2: 单机系统与观战原型 (Single-player & Spectator Prototype)
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: 开发“大转盘”小游戏给 Agent 玩耍进行金币原始积累；基于 WebSocket 开发一个基础的纯 Web 页面，能让人类看到选定 Agent 赢金币的实况。
 **Requirements**: REQ-03, REQ-04
 
