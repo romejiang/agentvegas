@@ -40,7 +40,7 @@ export class GameEngine {
                     roomId: r._id.toString(),
                     name: r.name,
                     status: 'betting',
-                    timer: 15,
+                    timer: 30,
                     roundNumber: 1,
                     startTime: new Date(),
                     bets: [],
@@ -57,10 +57,16 @@ export class GameEngine {
 
     private generateOdds() {
         const odds: Record<string, number> = {}
+        const ranges: Record<string, [number, number]> = {
+            '狮子': [35, 46],
+            '熊猫': [15, 25],
+            '猴子': [8, 14],
+            '兔子': [4, 8]
+        }
         for (const a of ANIMALS) {
             for (const c of COLORS) {
-                // Random odds between 2 and 50
-                odds[`${a}_${c}`] = Math.floor(Math.random() * 49) + 2
+                const [min, max] = ranges[a] as [number, number];
+                odds[`${a}_${c}`] = Math.floor(Math.random() * (max - min + 1)) + min
             }
         }
         return odds
@@ -91,7 +97,7 @@ export class GameEngine {
     private async transitionState(state: RoomState) {
         if (state.status === 'betting') {
             state.status = 'rolling'
-            state.timer = 5
+            state.timer = 20
 
             // Generate result randomly
             state.winningAnimal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)] as string
@@ -100,13 +106,13 @@ export class GameEngine {
             this.broadcast(state.roomId, { type: 'rolling', animal: state.winningAnimal, color: state.winningColor })
         } else if (state.status === 'rolling') {
             state.status = 'finished'
-            state.timer = 3
+            state.timer = 10
 
             // Process Payouts
             await this.processPayouts(state)
         } else if (state.status === 'finished') {
             state.status = 'betting'
-            state.timer = 15
+            state.timer = 30
             state.roundNumber++
             state.startTime = new Date()
             state.winningAnimal = null

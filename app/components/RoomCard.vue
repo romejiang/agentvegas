@@ -1,5 +1,5 @@
 <template>
-  <div class="relative bg-slate-800 p-6 rounded-xl border border-cyan-500/30 font-mono shadow-[0_0_15px_rgba(34,211,238,0.15)] overflow-hidden transition-all duration-300 hover:shadow-[0_0_25px_rgba(34,211,238,0.4)] hover:border-cyan-400">
+  <NuxtLink :to="'/room/' + room?.roomId" class="block relative bg-slate-800 p-6 rounded-xl border border-cyan-500/30 font-mono shadow-[0_0_15px_rgba(34,211,238,0.15)] overflow-hidden transition-all duration-300 hover:shadow-[0_0_25px_rgba(34,211,238,0.4)] hover:border-cyan-400">
     <!-- Cyberpunk ambient glow -->
     <div class="absolute -top-10 -right-10 w-32 h-32 bg-cyan-600/10 blur-3xl rounded-full pointer-events-none"></div>
     <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-fuchsia-600/10 blur-3xl rounded-full pointer-events-none"></div>
@@ -50,7 +50,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </NuxtLink>
 </template>
 
 <script setup>
