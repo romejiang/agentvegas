@@ -4,4 +4,9 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['nuxt-mongoose', '@nuxtjs/tailwindcss'],
   css: ['~/assets/css/main.css'],
+  nitro: {
+    experimental: {
+      websocket: true
+    }
+  }
 })

@@ -94,8 +94,8 @@ export class GameEngine {
             state.timer = 5
 
             // Generate result randomly
-            state.winningAnimal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)]
-            state.winningColor = COLORS[Math.floor(Math.random() * COLORS.length)]
+            state.winningAnimal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)] as string
+            state.winningColor = COLORS[Math.floor(Math.random() * COLORS.length)] as string
 
             this.broadcast(state.roomId, { type: 'rolling', animal: state.winningAnimal, color: state.winningColor })
         } else if (state.status === 'rolling') {
