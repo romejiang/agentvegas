@@ -14,7 +14,7 @@
 ## Phases
 
 ### Phase 1: 基础设施与 Agent API 接入点 (Foundation)
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: 建立 Agent 发起连接、获取初始资产的基础系统。包括数据库设计（极简版户口簿和金币余额）与一套安全的 REST API。
 **Requirements**: REQ-01, REQ-02
 
