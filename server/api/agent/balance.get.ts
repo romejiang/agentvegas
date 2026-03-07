@@ -1,4 +1,4 @@
-import { Agent } from '~/server/models/Agent'
+import { Agent } from '../../models/Agent'
 
 export default defineEventHandler(async (event) => {
     const query = getQuery(event)

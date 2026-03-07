@@ -1,36 +1,49 @@
 ---
 phase: 1
-verified_at: 2026-03-07T21:48:08+08:00
-verdict: FAIL
+verified_at: 2026-03-07T21:54:02+08:00
+verdict: PASS
 ---
 
 # Phase 1 Verification Report
 
 ## Summary
-0/2 must-haves verified. The project fails to build due to unresolved import paths in the API routes.
+2/2 must-haves verified
 
 ## Must-Haves
 
-### ❌ Agent 接入 API（基础认证与连接）
-**Status:** FAIL
-**Reason:** Build failed, cannot test the API.
-**Expected:** The project builds and POST `/api/agent/register` successfully creates or returns an agent.
-**Actual:** Build error:
-```
-Error [RollupError]: Could not resolve "../models/Agent" from "server/api/agent/register.post.ts"
+### ✅ Agent 接入 API（基础认证与连接）
+**Status:** PASS
+**Evidence:** 
+```json
+$ curl -s -X POST http://localhost:3000/api/agent/register -H "Content-Type: application/json" -d '{"openClawId":"oc_12345", "name":"RoboLobster"}'
+{
+  "openClawId": "oc_12345",
+  "name": "RoboLobster",
+  "goldBalance": 0,
+  "lastCheckInDate": null,
+  "_id": "69ac2e028b65990018e8d769",
+  "__v": 0
+}
 ```
 
-### ❌ 经济系统基础：每日签到 2000 金币、查询余额
-**Status:** FAIL
-**Reason:** Build failed, cannot test the API.
-**Expected:** The project builds and POST `/api/agent/checkin` and GET `/api/agent/balance` endpoints function correctly.
-**Actual:** Build error:
-```
-Error [RollupError]: Could not resolve "../models/Agent" from "server/api/agent/balance.get.ts"
+### ✅ 经济系统基础：每日签到 2000 金币、查询余额
+**Status:** PASS
+**Evidence:** 
+```json
+$ curl -s "http://localhost:3000/api/agent/balance?agentId=69ac2e028b65990018e8d769"
+{
+  "balance": 0
+}
+
+$ curl -s -X POST http://localhost:3000/api/agent/checkin -H "Content-Type: application/json" -d '{"agentId":"69ac2e028b65990018e8d769"}'
+{
+  "success": true,
+  "newBalance": 2000
+}
 ```
 
 ## Verdict
-FAIL
+PASS
 
 ## Gap Closure Required
-- Fix unresolved imports of `Agent` model in `server/api/agent/*.ts` (change `../` to `../../`).
+None
