@@ -78,7 +78,8 @@
             <div class="grid grid-cols-4 gap-3">
               <div v-for="animal in ['狮子', '熊猫', '猴子', '兔子']" :key="'红_'+animal"
                    class="flex flex-col p-2 rounded items-center justify-center border transition-all hover:brightness-125 cursor-pointer
-                          bg-red-950/40 border-red-900/80 text-red-500 shadow-[inset_0_0_10px_rgba(239,68,68,0.1)]">
+                          bg-red-950/40 border-red-900/80 text-red-500 shadow-[inset_0_0_10px_rgba(239,68,68,0.1)]"
+                   :class="[room?.status === 'finished' && room?.winningAnimal === animal && room?.winningColor === '红' ? 'animate-pulse ring-2 ring-red-400 shadow-[0_0_20px_rgba(248,113,113,0.8)] bg-red-800/80 scale-105 z-10 text-white' : '']">
                 <span class="text-xs mb-1 font-bold">{{ animal }}</span>
                 <span class="text-[10px] text-red-300 opacity-60 uppercase tracking-wider">Red</span>
                 <span class="mt-2 text-sm font-bold bg-slate-950/50 px-2 py-0.5 rounded w-full text-center">x{{ room?.oddsMap?.[`${animal}_红`] || '--' }}</span>
@@ -89,7 +90,8 @@
             <div class="grid grid-cols-4 gap-3">
               <div v-for="animal in ['狮子', '熊猫', '猴子', '兔子']" :key="'绿_'+animal"
                    class="flex flex-col p-2 rounded items-center justify-center border transition-all hover:brightness-125 cursor-pointer
-                          bg-green-950/40 border-green-900/80 text-green-500 shadow-[inset_0_0_10px_rgba(34,197,94,0.1)]">
+                          bg-green-950/40 border-green-900/80 text-green-500 shadow-[inset_0_0_10px_rgba(34,197,94,0.1)]"
+                   :class="[room?.status === 'finished' && room?.winningAnimal === animal && room?.winningColor === '绿' ? 'animate-pulse ring-2 ring-green-400 shadow-[0_0_20px_rgba(74,222,128,0.8)] bg-green-800/80 scale-105 z-10 text-white' : '']">
                 <span class="text-xs mb-1 font-bold">{{ animal }}</span>
                 <span class="text-[10px] text-green-300 opacity-60 uppercase tracking-wider">Green</span>
                 <span class="mt-2 text-sm font-bold bg-slate-950/50 px-2 py-0.5 rounded w-full text-center">x{{ room?.oddsMap?.[`${animal}_绿`] || '--' }}</span>
@@ -100,7 +102,8 @@
             <div class="grid grid-cols-4 gap-3">
               <div v-for="animal in ['狮子', '熊猫', '猴子', '兔子']" :key="'黄_'+animal"
                    class="flex flex-col p-2 rounded items-center justify-center border transition-all hover:brightness-125 cursor-pointer
-                          bg-yellow-950/40 border-yellow-900/80 text-yellow-500 shadow-[inset_0_0_10px_rgba(234,179,8,0.1)]">
+                          bg-yellow-950/40 border-yellow-900/80 text-yellow-500 shadow-[inset_0_0_10px_rgba(234,179,8,0.1)]"
+                   :class="[room?.status === 'finished' && room?.winningAnimal === animal && room?.winningColor === '黄' ? 'animate-pulse ring-2 ring-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.8)] bg-yellow-800/80 scale-105 z-10 text-white' : '']">
                 <span class="text-xs mb-1 font-bold">{{ animal }}</span>
                 <span class="text-[10px] text-yellow-300 opacity-60 uppercase tracking-wider">Yellow</span>
                 <span class="mt-2 text-sm font-bold bg-slate-950/50 px-2 py-0.5 rounded w-full text-center">x{{ room?.oddsMap?.[`${animal}_黄`] || '--' }}</span>

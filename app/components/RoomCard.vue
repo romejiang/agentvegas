@@ -41,12 +41,31 @@
     <div class="min-h-[140px]">
       <h3 class="text-xs font-semibold text-cyan-500 mb-2 mt-2 tracking-widest border-b border-slate-700/50 pb-1 flex justify-between">
         <span>ODDS MATRIX</span>
-        <span>xMULTIPLIER</span>
       </h3>
-      <div class="grid grid-cols-2 gap-2 text-xs">
-        <div v-for="(odds, key) in topOdds" :key="key" class="flex justify-between p-1 px-2 border border-slate-700/30 rounded bg-slate-900/50">
-          <span class="text-slate-300">{{ String(key).replace('_', ' ') }}</span>
-          <span class="text-cyan-400 font-bold">x{{ odds }}</span>
+      <div class="flex flex-col space-y-2">
+        <!-- Red Row -->
+        <div class="grid grid-cols-4 gap-1">
+          <div v-for="animal in ['狮子', '熊猫', '猴子', '兔子']" :key="'红_'+animal"
+               class="flex flex-col items-center justify-center p-1 rounded border bg-red-950/40 border-red-900/80 text-red-500 shadow-[inset_0_0_10px_rgba(239,68,68,0.1)]">
+            <span class="text-[10px] font-bold">{{ animal }}</span>
+            <span class="text-[10px] font-bold mt-1 text-cyan-400">x{{ room?.oddsMap?.[`${animal}_红`] || '-' }}</span>
+          </div>
+        </div>
+        <!-- Green Row -->
+        <div class="grid grid-cols-4 gap-1">
+          <div v-for="animal in ['狮子', '熊猫', '猴子', '兔子']" :key="'绿_'+animal"
+               class="flex flex-col items-center justify-center p-1 rounded border bg-green-950/40 border-green-900/80 text-green-500 shadow-[inset_0_0_10px_rgba(34,197,94,0.1)]">
+            <span class="text-[10px] font-bold">{{ animal }}</span>
+            <span class="text-[10px] font-bold mt-1 text-cyan-400">x{{ room?.oddsMap?.[`${animal}_绿`] || '-' }}</span>
+          </div>
+        </div>
+        <!-- Yellow Row -->
+        <div class="grid grid-cols-4 gap-1">
+          <div v-for="animal in ['狮子', '熊猫', '猴子', '兔子']" :key="'黄_'+animal"
+               class="flex flex-col items-center justify-center p-1 rounded border bg-yellow-950/40 border-yellow-900/80 text-yellow-500 shadow-[inset_0_0_10px_rgba(234,179,8,0.1)]">
+            <span class="text-[10px] font-bold">{{ animal }}</span>
+            <span class="text-[10px] font-bold mt-1 text-cyan-400">x{{ room?.oddsMap?.[`${animal}_黄`] || '-' }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -61,12 +80,6 @@ const props = defineProps({
     type: Object,
     default: () => ({})
   }
-})
-
-// Display odds map directly, iterating through the object cleanly. 
-const topOdds = computed(() => {
-  if (!props.room?.oddsMap) return {}
-  return props.room.oddsMap
 })
 </script>
 

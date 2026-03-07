@@ -40,7 +40,7 @@ export class GameEngine {
                     roomId: r._id.toString(),
                     name: r.name,
                     status: 'betting',
-                    timer: 30,
+                    timer: 40,
                     roundNumber: 1,
                     startTime: new Date(),
                     bets: [],
@@ -97,7 +97,7 @@ export class GameEngine {
     private async transitionState(state: RoomState) {
         if (state.status === 'betting') {
             state.status = 'rolling'
-            state.timer = 20
+            state.timer = 10
 
             // Generate result randomly
             state.winningAnimal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)] as string
@@ -112,7 +112,7 @@ export class GameEngine {
             await this.processPayouts(state)
         } else if (state.status === 'finished') {
             state.status = 'betting'
-            state.timer = 30
+            state.timer = 40
             state.roundNumber++
             state.startTime = new Date()
             state.winningAnimal = null
