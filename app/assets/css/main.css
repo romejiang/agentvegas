@@ -2,6 +2,226 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+:root {
+  /* Kawaii Pink Theme Colors */
+  --pink-50: #FFF0F5;
+  --pink-100: #FFE4ED;
+  --pink-200: #FFCCD9;
+  --pink-300: #FFB0C8;
+  --pink-400: #FF8FAF;
+  --pink-500: #FF69B4;
+  --pink-600: #FF1493;
+  --pink-700: #DB0A7A;
+  --pink-800: #B30865;
+  --pink-900: #8B0652;
+
+  --cream: #FFF8F0;
+  --cream-pink: #FFF0F6;
+  --soft-white: #FFFBFE;
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(255, 182, 193, 0.5);
+  --glow-pink: rgba(255, 105, 180, 0.3);
+  --glow-gold: rgba(255, 215, 0, 0.3);
+}
+
 body {
-  @apply bg-slate-900 text-white font-mono;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #FFD6E8 0%, #FFC0CB 30%, #FFB6D9 60%, #FFAFD0 100%);
+  color: #4A3040;
+  min-height: 100vh;
+}
+
+/* Kawaii glassmorphism cards */
+.kawaii-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid var(--card-border);
+  border-radius: 20px;
+  box-shadow:
+    0 4px 24px rgba(255, 105, 180, 0.12),
+    0 1px 4px rgba(255, 182, 193, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kawaii-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 32px rgba(255, 105, 180, 0.2),
+    0 2px 8px rgba(255, 182, 193, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Stat badge pills */
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.stat-pill-green {
+  background: linear-gradient(135deg, #A8E6CF, #7BD3A0);
+  color: #1A5E3A;
+}
+
+.stat-pill-gold {
+  background: linear-gradient(135deg, #FFE066, #FFD23F);
+  color: #7A5B00;
+}
+
+.stat-pill-blue {
+  background: linear-gradient(135deg, #A8D8F0, #7EC8E3);
+  color: #1A4B6E;
+}
+
+/* Pink gradient button */
+.btn-pink {
+  background: linear-gradient(135deg, #FF69B4, #FF1493);
+  color: white;
+  font-weight: 800;
+  padding: 12px 32px;
+  border-radius: 16px;
+  border: none;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 16px rgba(255, 20, 147, 0.4);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.btn-pink:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 24px rgba(255, 20, 147, 0.5);
+}
+
+/* Status badges */
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.status-betting {
+  background: linear-gradient(135deg, #A8E6CF, #7BD3A0);
+  color: #1A5E3A;
+}
+
+.status-rolling {
+  background: linear-gradient(135deg, #FFE066, #FFD23F);
+  color: #7A5B00;
+  animation: pulse-soft 1.5s ease-in-out infinite;
+}
+
+.status-finished {
+  background: linear-gradient(135deg, #FFB0C8, #FF69B4);
+  color: #fff;
+}
+
+@keyframes pulse-soft {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
+}
+
+/* Polka dot background pattern */
+.polka-bg {
+  background-image: radial-gradient(circle, rgba(255, 182, 193, 0.3) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Cute scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--pink-50);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--pink-300);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--pink-400);
+}
+
+/* Animal color rows */
+.color-row-red {
+  background: linear-gradient(135deg, #FFF0F0, #FFE8EC);
+  border: 1.5px solid #FFB0B0;
+}
+
+.color-row-green {
+  background: linear-gradient(135deg, #F0FFF4, #E8FFEC);
+  border: 1.5px solid #A8E6CF;
+}
+
+.color-row-yellow {
+  background: linear-gradient(135deg, #FFFFF0, #FFFDE8);
+  border: 1.5px solid #FFE066;
+}
+
+/* Cute bounce animation */
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  70% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+/* Sparkle effect */
+@keyframes sparkle {
+
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.sparkle {
+  animation: sparkle 2s ease-in-out infinite;
 }
