@@ -55,33 +55,36 @@
           </div>
 
           <!-- Target Display -->
-          <div class="relative w-64 h-64 md:w-72 md:h-72 rounded-full flex items-center justify-center z-10 transition-all duration-300"
-               style="background: linear-gradient(135deg, rgba(255,240,245,0.8), rgba(255,228,237,0.6)); border: 3px solid rgba(255,182,193,0.5); box-shadow: inset 0 0 30px rgba(255,182,193,0.2), 0 8px 32px rgba(255,105,180,0.15);">
-            
-            <!-- Animals positioned around circle -->
-            <div v-for="(slot, i) in slots" :key="i"
-                 class="absolute w-12 h-12 -ml-6 -mt-6 rounded-xl flex items-center justify-center font-bold text-xs border-2 transition-all duration-[30ms]"
-                 :style="getSlotStyle(i)"
-                 :class="[
-                   getSlotColorClass(slot.color),
-                   activeIndex === i ? 'scale-125 z-20 ' + getActiveSlotGlow(slot.color) : 'opacity-50'
-                 ]">
-              {{ slot.animal }}
+          <div class="relative w-56 h-56 md:w-[260px] md:h-[260px] flex items-center justify-center z-10">
+            <!-- Rotating Wheel Base and Animals -->
+            <div class="absolute inset-0 rounded-full transition-all duration-300"
+                 style="background: linear-gradient(135deg, rgba(255,240,245,0.8), rgba(255,228,237,0.6)); border: 3px solid rgba(255,182,193,0.5); box-shadow: inset 0 0 30px rgba(255,182,193,0.2), 0 8px 32px rgba(255,105,180,0.15);"
+                 :class="{ 'animate-slow-spin': room?.status === 'rolling' && spinDirection === 1, 'animate-slow-spin-reverse': room?.status === 'rolling' && spinDirection === -1 }">
+              
+              <!-- Animals positioned around circle -->
+              <div v-for="(slot, i) in slots" :key="i"
+                   class="absolute w-16 h-16 -ml-8 -mt-8 flex items-center justify-center transition-all duration-[80ms]"
+                   :style="getSlotStyle(i)"
+                   :class="[
+                     activeIndex === i ? 'scale-[2.2] z-40 drop-shadow-[0_0_30px_rgba(255,255,255,1)] brightness-125 saturate-150 animate-pulse' : 'scale-[0.85] brightness-[0.85] opacity-90'
+                   ]">
+                <img :src="getFullBodyIcon(slot.animal, slot.color)" :alt="slot.animal" class="w-full h-full object-contain drop-shadow-lg" />
+              </div>
             </div>
             
             <!-- Center Result Text -->
-            <div class="flex flex-col items-center justify-center text-center animate-bounce-in" v-if="room.status === 'finished' && room.winningAnimal">
-              <span class="text-xs text-pink-400 tracking-wider mb-1 font-bold">🏆 赢家</span>
-              <span class="text-3xl md:text-4xl font-black drop-shadow-lg" :class="getTextColorClass(room.winningColor)">
+            <div class="relative z-30 flex flex-col items-center justify-center text-center animate-bounce-in bg-white/30 backdrop-blur-sm rounded-full w-36 h-36 shadow-inner border border-white/40" v-if="room.status === 'finished' && room.winningAnimal">
+              <span class="text-xs text-pink-500 tracking-wider mb-1 font-extrabold">🏆 赢家</span>
+              <span class="text-3xl md:text-3xl font-black drop-shadow-lg" :class="getTextColorClass(room.winningColor)">
                 {{ room.winningColor }}{{ room.winningAnimal }}
               </span>
-              <span class="text-xs text-fuchsia-400 mt-2 tracking-wider font-bold sparkle">✨ 已记录</span>
+              <span class="text-[10px] text-fuchsia-500 mt-2 tracking-wider font-bold sparkle">✨ 已记录</span>
             </div>
-            <div class="flex flex-col items-center justify-center" v-else-if="room.status === 'rolling'">
-              <span class="text-sm text-amber-500 font-black tracking-wider animate-pulse">🎰 旋转中...</span>
+            <div class="relative z-30 flex flex-col items-center justify-center bg-white/30 backdrop-blur-sm rounded-full w-24 h-24 border border-white/20" v-else-if="room.status === 'rolling'">
+              <span class="text-sm text-amber-600 font-extrabold tracking-wider animate-pulse">🎰 旋转中</span>
             </div>
-            <div class="flex flex-col items-center justify-center" v-else>
-              <span class="text-sm text-emerald-500 tracking-wider font-bold">💰 等待投注</span>
+            <div class="relative z-30 flex flex-col items-center justify-center" v-else>
+              <span class="text-sm text-emerald-600 tracking-wider font-extrabold bg-white/50 backdrop-blur-sm px-4 py-2 rounded-2xl shadow-sm">💰 等待投注</span>
             </div>
           </div>
         </div>
@@ -166,6 +169,7 @@ const roomId = route.params.id
 const isConnected = ref(false)
 const room = ref(null)
 const activeIndex = ref(-1)
+const spinDirection = ref(1)
 
 // Generate the 12 slots for the wheel: 3 colors x 4 animals
 const COLORS = ['红', '绿', '黄']
@@ -179,6 +183,12 @@ function getAnimalIcon(animal, color) {
   const a = ANIMAL_NAME_MAP[animal]
   const c = COLOR_NAME_MAP[color]
   return a && c ? `/icons/${a}-${c}.png` : ''
+}
+
+function getFullBodyIcon(animal, color) {
+  const a = ANIMAL_NAME_MAP[animal]
+  const c = COLOR_NAME_MAP[color]
+  return a && c ? `/animals/${a}-${c}.png` : ''
 }
 
 function seedRandom(seed) {
@@ -216,7 +226,7 @@ const slots = computed(() => {
 const fixedSlots = ref(null)
 
 function getSlotStyle(i) {
-  const R = 120
+  const R = 158
   const angle = (i * (360 / 12)) * (Math.PI / 180) - (Math.PI / 2)
   const x = R * Math.cos(angle)
   const y = R * Math.sin(angle)
@@ -227,24 +237,10 @@ function getSlotStyle(i) {
   }
 }
 
-function getSlotColorClass(color) {
-  if (color === '红') return 'bg-red-50 border-red-300 text-red-500'
-  if (color === '绿') return 'bg-emerald-50 border-emerald-300 text-emerald-600'
-  if (color === '黄') return 'bg-amber-50 border-amber-300 text-amber-600'
-  return ''
-}
-
 function getTextColorClass(color) {
   if (color === '红') return 'text-red-500'
   if (color === '绿') return 'text-emerald-500'
   if (color === '黄') return 'text-amber-500'
-  return ''
-}
-
-function getActiveSlotGlow(color) {
-  if (color === '红') return 'shadow-[0_0_20px_rgba(239,68,68,0.6)] border-red-500 scale-[1.3] bg-red-100'
-  if (color === '绿') return 'shadow-[0_0_20px_rgba(52,211,153,0.6)] border-emerald-500 scale-[1.3] bg-emerald-100'
-  if (color === '黄') return 'shadow-[0_0_20px_rgba(251,191,36,0.6)] border-amber-500 scale-[1.3] bg-amber-100'
   return ''
 }
 
@@ -284,8 +280,9 @@ onMounted(() => {
 // Spin visualizer logic
 watch(() => room.value?.status, (newStatus) => {
   if (newStatus === 'rolling') {
+    spinDirection.value = Math.random() > 0.5 ? 1 : -1
     if (spinInterval) clearInterval(spinInterval)
-    let speed = 50
+    let speed = 65 // slowed down by ~30% from 50
     const startSpin = () => {
       activeIndex.value = (activeIndex.value + 1) % 12
     }
@@ -321,5 +318,20 @@ onBeforeUnmount(() => {
 @keyframes bounceIn {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slowSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes slowSpinReverse {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+.animate-slow-spin {
+  animation: slowSpin 25s linear infinite;
+}
+.animate-slow-spin-reverse {
+  animation: slowSpinReverse 25s linear infinite;
 }
 </style>
