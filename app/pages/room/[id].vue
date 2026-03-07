@@ -140,6 +140,18 @@ const activeIndex = ref(-1)
 // Generate the 12 slots for the wheel: 3 colors x 4 animals
 const COLORS = ['红', '绿', '黄']
 const ANIMALS = ['狮子', '熊猫', '猴子', '兔子']
+// Simple deterministic random generator based on a string seed
+function seedRandom(seed) {
+  let x = 0;
+  for (let i = 0; i < seed.length; i++) {
+    x = (x + seed.charCodeAt(i)) * 31 & 0xFFFFFFFF;
+  }
+  return function() {
+    x = (x * 1103515245 + 12345) & 0x7FFFFFFF;
+    return x / 0x7FFFFFFF;
+  }
+}
+
 const slots = computed(() => {
   const arr = []
   // Pattern to interleave colors and animals
@@ -148,9 +160,10 @@ const slots = computed(() => {
       arr.push({ animal: a, color: c })
     }
   }
-  // Shuffle or arrange logically. We'll leave it grouped or interleaved.
-  // We'll return 12 slots here.
-  return arr.sort(() => Math.random() - 0.5) // Optional shuffle to make it a bit random each load
+  // Deterministic shuffle based on roomId
+  if (!roomId) return arr;
+  const rng = seedRandom(roomId.toString())
+  return arr.sort(() => rng() - 0.5)
 })
 // Fix the slots layout so they don't jump per tick
 const fixedSlots = ref(null)
