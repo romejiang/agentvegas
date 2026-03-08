@@ -31,7 +31,7 @@
     </div>
     
     <!-- Result Area -->
-    <div v-if="room?.status !== 'betting' && room?.winningAnimal" 
+    <div v-if="room?.status === 'finished' && room?.winningAnimal" 
          class="mb-5 p-4 rounded-2xl text-center animate-bounce-in relative z-10"
          style="background: linear-gradient(135deg, #FFF0F5, #FFE4ED);">
       <div class="text-xs text-pink-400 mb-1 font-bold tracking-wider">🏆 开奖结果</div>

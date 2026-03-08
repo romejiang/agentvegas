@@ -33,26 +33,55 @@ export class GameEngine {
     // Broadcast event - will be implemented for real-time later
     public broadcast(roomId: string, event: any) { }
 
+    // 硬编码偏移量，确保每个房间时间大幅错开且保持不变
+    private readonly ROOM_OFFSETS = [0, 15, 30, 45, 12, 27, 42, 57];
+
+    private getRoomOffset(index: number): number {
+        return this.ROOM_OFFSETS[index % this.ROOM_OFFSETS.length] || 0;
+    }
+
     public initialize(dbRooms: any[]) {
-        for (const r of dbRooms) {
-            if (!this.rooms.has(r._id.toString())) {
+        dbRooms.forEach((r, index) => {
+            const roomId = r._id.toString()
+            if (!this.rooms.has(roomId)) {
+                const offset = this.getRoomOffset(index)
+                let status: RoomStateEnum = 'betting'
+                let timer = 40
+                let winningAnimal: string | null = null
+                let winningColor: string | null = null
+
+                if (offset < 40) {
+                    status = 'betting'
+                    timer = 40 - offset
+                } else if (offset < 50) {
+                    status = 'rolling'
+                    timer = 50 - offset
+                    winningAnimal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)] as string
+                    winningColor = COLORS[Math.floor(Math.random() * COLORS.length)] as string
+                } else {
+                    status = 'finished'
+                    timer = 60 - offset
+                    winningAnimal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)] as string
+                    winningColor = COLORS[Math.floor(Math.random() * COLORS.length)] as string
+                }
+
                 const state: RoomState = {
-                    roomId: r._id.toString(),
+                    roomId,
                     name: r.name,
-                    status: 'betting',
-                    timer: 40,
+                    status,
+                    timer,
                     roundNumber: 1,
-                    startTime: new Date(),
+                    startTime: new Date(Date.now() - offset * 1000),
                     bets: [],
                     oddsMap: this.generateOdds(),
-                    winningAnimal: null,
-                    winningColor: null,
+                    winningAnimal,
+                    winningColor,
                     interval: null
                 }
-                this.rooms.set(r._id.toString(), state)
+                this.rooms.set(roomId, state)
                 this.startRoomLoop(state)
             }
-        }
+        })
     }
 
     private generateOdds() {

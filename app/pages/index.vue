@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen p-6 md:p-8 pb-40">
+  <div class="min-h-screen px-6 pt-6 pb-[200px] md:px-8 md:pt-8 md:pb-[200px]">
     <div class="max-w-7xl mx-auto">
       <!-- Header -->
       <header class="mb-10 pb-6 flex items-center justify-between">
@@ -33,13 +33,26 @@
       </div>
       
       <!-- Bottom log panel -->
-      <div class="fixed bottom-0 left-0 w-full backdrop-blur-xl border-t border-pink-200/50 p-3 h-28 overflow-hidden pointer-events-none z-20"
+      <div class="fixed bottom-0 left-0 w-full backdrop-blur-xl border-t border-pink-200/50 transition-all duration-300 z-20 pointer-events-none"
+           :class="isLogCollapsed ? 'h-12' : 'h-32'"
            style="background: linear-gradient(to top, rgba(255,240,245,0.95), rgba(255,240,245,0.7));">
-        <div class="max-w-7xl mx-auto flex flex-col justify-end h-full">
-          <div v-for="(log, i) in logHistory" :key="i" 
-               class="text-xs mb-1 font-semibold"
-               :class="log.includes('ERROR') ? 'text-red-400' : 'text-pink-500/70'">
-            {{ log }}
+        <div class="max-w-7xl mx-auto h-full relative px-4 py-2 flex flex-col justify-end">
+          <button @click="isLogCollapsed = !isLogCollapsed" 
+                  class="absolute top-2 right-4 text-pink-500 hover:text-pink-600 font-extrabold text-[10px] md:text-xs px-3 py-1.5 pointer-events-auto bg-white/60 rounded-lg shadow-sm backdrop-blur-sm transition-all hover:scale-105 active:scale-95 border border-pink-100">
+            {{ isLogCollapsed ? '展开日志 ▲' : '收起日志 ▼' }}
+          </button>
+          
+          <div v-if="!isLogCollapsed" class="flex flex-col justify-end h-full overflow-hidden w-[85%] pb-1">
+            <div v-for="(log, i) in logHistory" :key="i" 
+                 class="text-xs mb-1 font-semibold truncate animate-fade-in"
+                 :class="log.includes('ERROR') || log.includes('❌') ? 'text-red-400' : 'text-pink-500/70'">
+              {{ log }}
+            </div>
+          </div>
+          <div v-else class="flex flex-col justify-center h-full w-[75%] md:w-[85%]">
+            <span class="text-xs font-semibold text-pink-500/70 truncate">
+               <span class="animate-pulse mr-1">💬</span> {{ latestLog }}
+            </span>
           </div>
         </div>
       </div>
@@ -53,6 +66,7 @@ import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 const isConnected = ref(false)
 const rooms = ref(new Map())
 const logs = ref([])
+const isLogCollapsed = ref(false)
 
 const roomList = computed(() => {
   return Array.from(rooms.value.values()).sort((a, b) => {
@@ -62,6 +76,10 @@ const roomList = computed(() => {
 
 const logHistory = computed(() => {
   return logs.value.slice(-5)
+})
+
+const latestLog = computed(() => {
+  return logs.value.length > 0 ? logs.value[logs.value.length - 1] : '系统启动中...'
 })
 
 function addLog(msg) {
