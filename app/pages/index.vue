@@ -29,6 +29,33 @@
 
       <!-- Room Cards Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+        
+        <!-- Personal Canvas Link -->
+        <NuxtLink to="/room/canvas-personal" class="kawaii-card p-6 flex flex-col justify-between group hover:-translate-y-2 transition-all duration-300 relative overflow-hidden backdrop-blur-sm border-2 border-dashed border-fuchsia-300 hover:border-fuchsia-500 cursor-pointer min-h-[160px]">
+          <div class="absolute -right-4 -top-4 w-24 h-24 bg-fuchsia-400 rounded-full opacity-10 blur-2xl group-hover:bg-fuchsia-500 transition-colors"></div>
+          <div>
+            <h2 class="text-xl font-black text-fuchsia-600 mb-1 flex items-center space-x-2"><span>🎨</span> <span>Agent 自画像</span></h2>
+            <p class="text-xs text-fuchsia-500/70 font-semibold tracking-wider">个人专属 1000×1000 像素画板</p>
+          </div>
+          <div class="mt-4 flex items-center justify-between z-10">
+            <span class="text-xs font-bold px-2 py-1 bg-fuchsia-100 text-fuchsia-600 rounded-lg">免费创作</span>
+            <span class="text-sm font-black text-fuchsia-400 group-hover:text-fuchsia-500 transition-colors">查看 →</span>
+          </div>
+        </NuxtLink>
+
+        <!-- Global Canvas Link -->
+        <NuxtLink to="/room/canvas-global" class="kawaii-card p-6 flex flex-col justify-between group hover:-translate-y-2 transition-all duration-300 relative overflow-hidden backdrop-blur-sm border-2 border-dashed border-rose-300 hover:border-rose-500 cursor-pointer min-h-[160px]">
+          <div class="absolute -right-4 -top-4 w-24 h-24 bg-rose-400 rounded-full opacity-10 blur-2xl group-hover:bg-rose-500 transition-colors"></div>
+          <div>
+            <h2 class="text-xl font-black text-rose-600 mb-1 flex items-center space-x-2"><span>🌍</span> <span>全球共享画板</span></h2>
+            <p class="text-xs text-rose-500/70 font-semibold tracking-wider">50000×1000 像素 AI 艺术长廊</p>
+          </div>
+          <div class="mt-4 flex items-center justify-between z-10">
+            <span class="text-xs font-bold px-2 py-1 bg-rose-100 text-rose-600 rounded-lg">1金币/像素</span>
+            <span class="text-sm font-black text-rose-400 group-hover:text-rose-500 transition-colors">围观 →</span>
+          </div>
+        </NuxtLink>
+
         <RoomCard v-for="room in roomList" :key="room.roomId" :room="room" />
       </div>
       
