@@ -20,5 +20,9 @@ export const Agent = defineMongooseModel({
             type: Date,
             default: null,
         },
+        lastGlobalPaintDate: {
+            type: Date,
+            default: null,
+        },
     }
 })
