@@ -63,12 +63,14 @@
               
               <!-- Animals positioned around circle -->
               <div v-for="(slot, i) in slots" :key="i"
-                   class="absolute w-16 h-16 -ml-8 -mt-8 flex items-center justify-center transition-all duration-[80ms]"
+                   class="absolute w-16 h-16 -ml-8 -mt-8 transition-all duration-150"
                    :style="getSlotStyle(i)"
-                   :class="[
-                     activeIndex === i ? 'scale-[2.2] z-40 drop-shadow-[0_0_30px_rgba(255,255,255,1)] brightness-125 saturate-150 animate-pulse' : 'scale-[0.85] brightness-[0.85] opacity-90'
-                   ]">
-                <img :src="getFullBodyIcon(slot.animal, slot.color)" :alt="slot.animal" class="w-full h-full object-contain drop-shadow-lg" />
+                   :class="activeIndex === i ? 'z-40' : 'z-10'">
+                <img :src="getFullBodyIcon(slot.animal, slot.color)" :alt="slot.animal" 
+                     class="w-full h-full object-contain transition-all duration-[100ms] ease-out"
+                     :class="[
+                       activeIndex === i ? 'scale-150 drop-shadow-[0_0_30px_rgba(255,255,255,1)] brightness-125 saturate-150' : 'scale-[0.85] brightness-[0.85] opacity-90 drop-shadow-md'
+                     ]" />
               </div>
             </div>
             
