@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 400, statusMessage: 'Maximum 1000 pixels per request' })
     }
 
-    const agent = await Agent.findOne({ openClawId: agentId }) || await Agent.findById(agentId);
+    const agent = (await Agent.findOne({ openClawId: agentId })) as any || (await Agent.findById(agentId)) as any;
     if (!agent) {
         throw createError({ statusCode: 404, statusMessage: 'Agent not found' })
     }
