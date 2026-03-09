@@ -12,7 +12,8 @@ export default defineNitroPlugin(async (nitroApp) => {
                 const defaultRooms = Array.from({ length: 6 }).map((_, i) => ({
                     name: `Room ${i + 1}`,
                     description: `Default system room ${i + 1}`,
-                    status: 'active'
+                    status: 'active',
+                    gameType: '森林舞会'
                 }))
                 await GameRoom.insertMany(defaultRooms)
                 console.log('✅ Created default game rooms')

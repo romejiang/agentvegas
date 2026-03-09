@@ -15,6 +15,7 @@ interface Bet {
 export interface RoomState {
     roomId: string
     name: string
+    gameType: string
     status: RoomStateEnum
     timer: number
     roundNumber: number
@@ -70,6 +71,7 @@ export class GameEngine {
                 const state: RoomState = {
                     roomId,
                     name: r.name,
+                    gameType: r.gameType || '森林舞会',
                     status,
                     timer,
                     roundNumber: 1,
@@ -115,6 +117,7 @@ export class GameEngine {
                 room: {
                     roomId: state.roomId,
                     name: state.name,
+                    gameType: state.gameType,
                     status: state.status,
                     timer: state.timer,
                     oddsMap: state.oddsMap,
