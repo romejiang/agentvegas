@@ -2,6 +2,7 @@ import { gameEngine } from '../../utils/gameEngine'
 import { Agent } from '../../models/Agent'
 import { AgentLog } from '../../models/AgentLog'
 import { requireAgentAuth } from '../../utils/auth'
+import crypto from 'crypto'
 
 export default defineEventHandler(async (event) => {
     const authAgentId = requireAgentAuth(event)
@@ -30,18 +31,26 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
+        const room = gameEngine.rooms.get(roomId)
+        if (!room) throw new Error('Room not found')
+
+        const betId = crypto.randomUUID()
+
         // Logically attempt placing the bet in memory room engine
-        gameEngine.placeBet(roomId, agentId, animal, color, Number(amount))
+        gameEngine.placeBet(roomId, betId, agentId, animal, color, Number(amount))
 
         // Decrement user balance
         agent.goldBalance -= Number(amount)
         await agent.save()
 
+        const oddsKey = `${animal}_${color}`
+        const betOdds = room.oddsMap[oddsKey] || 0
+
         await AgentLog.create({
             agentId: agent._id.toString(),
             action: 'bet',
-            description: `Agent ${agent.name} placed a bet of ${amount} gold on ${color} ${animal} in room ${roomId}.`,
-            details: { roomId, animal, color, amount, newBalance: agent.goldBalance }
+            description: `Agent ${agent.name} placed a bet of ${amount} gold on ${color} ${animal} (odds: x${betOdds}) in ${room.name}. (-${amount} gold deducted from balance)`,
+            details: { betId, roomId, roomName: room.name, animal, color, amount, odds: betOdds, newBalance: agent.goldBalance }
         })
 
         return { success: true, newBalance: agent.goldBalance }

@@ -1,9 +1,11 @@
 import { GameRecord } from '../models/GameRecord'
 import { Agent } from '../models/Agent'
+import { AgentLog } from '../models/AgentLog'
 
 type RoomStateEnum = 'betting' | 'rolling' | 'finished'
 
 interface Bet {
+    betId: string
     agentId: string
     animal: string
     color: string
@@ -158,9 +160,35 @@ export class GameEngine {
 
             // Loop bets and payout
             for (const bet of state.bets) {
-                if (bet.animal === state.winningAnimal && bet.color === state.winningColor) {
-                    const winAmount = bet.amount * odds
-                    await Agent.findByIdAndUpdate(bet.agentId, { $inc: { goldBalance: winAmount } })
+                const isWin = bet.animal === state.winningAnimal && bet.color === state.winningColor
+                let winAmount = 0
+                let agent: any = null
+
+                if (isWin) {
+                    winAmount = bet.amount * odds
+                    agent = await Agent.findByIdAndUpdate(bet.agentId, { $inc: { goldBalance: winAmount } }, { new: true })
+                } else {
+                    agent = await Agent.findById(bet.agentId)
+                }
+
+                if (agent) {
+                    await AgentLog.create({
+                        agentId: agent._id.toString(),
+                        action: isWin ? 'game_win' : 'game_loss',
+                        description: `Agent ${agent.name} ${isWin ? 'won ' + winAmount + ' gold (+' + winAmount + ' gold added to balance)' : 'lost ' + bet.amount + ' gold'} in ${state.name}. Bet: ${bet.color} ${bet.animal}. Result: ${state.winningColor} ${state.winningAnimal}.`,
+                        details: {
+                            betId: bet.betId,
+                            roomId: state.roomId,
+                            roomName: state.name,
+                            betAnimal: bet.animal,
+                            betColor: bet.color,
+                            betAmount: bet.amount,
+                            winningAnimal: state.winningAnimal,
+                            winningColor: state.winningColor,
+                            winAmount,
+                            newBalance: agent.goldBalance
+                        }
+                    })
                 }
             }
 
@@ -180,11 +208,11 @@ export class GameEngine {
         }
     }
 
-    public placeBet(roomId: string, agentId: string, animal: string, color: string, amount: number) {
+    public placeBet(roomId: string, betId: string, agentId: string, animal: string, color: string, amount: number) {
         const room = this.rooms.get(roomId)
         if (!room || room.status !== 'betting') throw new Error('Room not accepting bets')
 
-        room.bets.push({ agentId, animal, color, amount })
+        room.bets.push({ betId, agentId, animal, color, amount })
     }
 }
 

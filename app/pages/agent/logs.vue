@@ -39,7 +39,7 @@
           <!-- Action Badge Overlay -->
           <div class="absolute -right-4 -top-4 w-20 h-20 rounded-full opacity-10 blur-xl transition-colors"
                :class="{
-                 'bg-emerald-400': log.action === 'checkin',
+                 'bg-emerald-400': log.action === 'checkin' || log.action === 'game_win',
                  'bg-indigo-400': log.action === 'login' || log.action === 'register',
                  'bg-rose-400': log.action === 'bet',
                  'bg-fuchsia-400': log.action.includes('paint')
@@ -51,12 +51,13 @@
               <!-- Action Icon -->
               <div class="text-2xl flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-xl"
                    :class="{
-                     'bg-emerald-100 text-emerald-500': log.action === 'checkin',
+                     'bg-emerald-100 text-emerald-500': log.action === 'checkin' || log.action === 'game_win',
                      'bg-indigo-100 text-indigo-500': log.action === 'login' || log.action === 'register',
                      'bg-rose-100 text-rose-500': log.action === 'bet',
                      'bg-fuchsia-100 text-fuchsia-500': log.action.includes('paint')
                    }">
                 <span v-if="log.action === 'checkin'">🎁</span>
+                <span v-else-if="log.action === 'game_win'">🏆</span>
                 <span v-else-if="log.action === 'login' || log.action === 'register'">👤</span>
                 <span v-else-if="log.action === 'bet'">🎲</span>
                 <span v-else-if="log.action.includes('paint')">🎨</span>
@@ -76,10 +77,11 @@
             </div>
 
             <!-- Detail Highlight (like amounts) -->
-            <div class="text-right flex-shrink-0 pl-4" v-if="['bet', 'checkin', 'paint_global'].includes(log.action)">
+            <div class="text-right flex-shrink-0 pl-4" v-if="['bet', 'checkin', 'paint_global', 'game_win'].includes(log.action)">
                <div v-if="log.action === 'bet'" class="text-sm font-black text-rose-500">-{{ log.details.amount }} 💎</div>
                <div v-else-if="log.action === 'checkin'" class="text-sm font-black text-emerald-500">+2000 💎</div>
                <div v-else-if="log.action === 'paint_global'" class="text-sm font-black text-fuchsia-500">-{{ log.details.cost }} 💎</div>
+               <div v-else-if="log.action === 'game_win'" class="text-sm font-black text-emerald-500">+{{ log.details.winAmount }} 💎</div>
                
                <div v-if="log.details.newBalance !== undefined" class="text-[10px] text-gray-400 font-bold mt-1">余额: {{ log.details.newBalance }}</div>
             </div>
@@ -107,7 +109,10 @@ const fetchLogs = async () => {
     const url = isObserverMode.value 
       ? `/api/agent/logs?token=${observerToken.value}` 
       : `/api/agent/logs`
-    const res = await $fetch(url)
+    
+    // Append timestamp to prevent browser caching GET request
+    const tsUrl = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now()
+    const res = await $fetch(tsUrl)
     if (res && res.logs) {
       logs.value = res.logs
     }
