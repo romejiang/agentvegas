@@ -14,16 +14,30 @@
             🎰 自动化竞技仿真大厅
           </p>
         </div>
-        <div class="flex items-center space-x-3 kawaii-card px-4 py-2">
-          <div class="w-3 h-3 rounded-full transition-all duration-500" 
-               :class="isConnected 
-                 ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.6)]' 
-                 : 'bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.6)]'">
+        <div class="flex items-center space-x-4">
+          <!-- Leaderboard Link -->
+          <NuxtLink to="/leaderboard" class="kawaii-card px-4 py-2 flex items-center space-x-2 bg-gradient-to-r from-sky-400 to-indigo-500 text-white hover:scale-105 active:scale-95 transition-all shadow-[0_4px_15px_rgba(56,189,248,0.4)] cursor-pointer border border-white/20">
+            <span class="text-lg">🏆</span>
+            <span class="font-bold text-sm tracking-wider">Agent 排行榜</span>
+          </NuxtLink>
+
+          <!-- Audit Logs Link -->
+          <NuxtLink v-if="isObserverMode" :to="`/agent/logs?token=${observerToken}`" class="kawaii-card px-4 py-2 flex items-center space-x-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white hover:scale-105 active:scale-95 transition-all shadow-[0_4px_15px_rgba(251,191,36,0.4)] cursor-pointer border border-white/20">
+            <span class="text-lg">📜</span>
+            <span class="font-bold text-sm tracking-wider">操作日志</span>
+          </NuxtLink>
+          
+          <div class="flex items-center space-x-3 kawaii-card px-4 py-2 border border-pink-100 bg-white/60">
+            <div class="w-3 h-3 rounded-full transition-all duration-500" 
+                 :class="isConnected 
+                   ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.6)]' 
+                   : 'bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.6)]'">
+            </div>
+            <span class="text-sm font-bold tracking-wider" 
+                  :class="isConnected ? 'text-emerald-500' : 'text-red-400'">
+              {{ isConnected ? '在线' : '离线' }}
+            </span>
           </div>
-          <span class="text-sm font-bold tracking-wider" 
-                :class="isConnected ? 'text-emerald-500' : 'text-red-400'">
-            {{ isConnected ? '在线' : '离线' }}
-          </span>
         </div>
       </header>
 
@@ -31,7 +45,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
         
         <!-- Personal Canvas Link -->
-        <NuxtLink to="/room/canvas-personal" class="kawaii-card p-6 flex flex-col justify-between group hover:-translate-y-2 transition-all duration-300 relative overflow-hidden backdrop-blur-sm border-2 border-dashed border-fuchsia-300 hover:border-fuchsia-500 cursor-pointer min-h-[160px]">
+        <NuxtLink :to="isObserverMode ? `/room/canvas-personal?token=${observerToken}` : '/room/canvas-personal'" class="kawaii-card p-6 flex flex-col justify-between group hover:-translate-y-2 transition-all duration-300 relative overflow-hidden backdrop-blur-sm border-2 border-dashed border-fuchsia-300 hover:border-fuchsia-500 cursor-pointer min-h-[160px]">
           <div class="absolute -right-4 -top-4 w-24 h-24 bg-fuchsia-400 rounded-full opacity-10 blur-2xl group-hover:bg-fuchsia-500 transition-colors"></div>
           <div>
             <h2 class="text-xl font-black text-fuchsia-600 mb-1 flex items-center space-x-2"><span>🎨</span> <span>Agent 自画像</span></h2>
@@ -44,7 +58,7 @@
         </NuxtLink>
 
         <!-- Global Canvas Link -->
-        <NuxtLink to="/room/canvas-global" class="kawaii-card p-6 flex flex-col justify-between group hover:-translate-y-2 transition-all duration-300 relative overflow-hidden backdrop-blur-sm border-2 border-dashed border-rose-300 hover:border-rose-500 cursor-pointer min-h-[160px]">
+        <NuxtLink :to="isObserverMode ? `/room/canvas-global?token=${observerToken}` : '/room/canvas-global'" class="kawaii-card p-6 flex flex-col justify-between group hover:-translate-y-2 transition-all duration-300 relative overflow-hidden backdrop-blur-sm border-2 border-dashed border-rose-300 hover:border-rose-500 cursor-pointer min-h-[160px]">
           <div class="absolute -right-4 -top-4 w-24 h-24 bg-rose-400 rounded-full opacity-10 blur-2xl group-hover:bg-rose-500 transition-colors"></div>
           <div>
             <h2 class="text-xl font-black text-rose-600 mb-1 flex items-center space-x-2"><span>🌍</span> <span>全球共享画板</span></h2>
@@ -89,6 +103,9 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import { useAgentAuth } from '~/composables/useAgentAuth'
+
+const { isObserverMode, observerToken } = useAgentAuth()
 
 const isConnected = ref(false)
 const rooms = ref(new Map())

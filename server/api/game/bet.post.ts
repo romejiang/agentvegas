@@ -1,5 +1,6 @@
 import { gameEngine } from '../../utils/gameEngine'
 import { Agent } from '../../models/Agent'
+import { AgentLog } from '../../models/AgentLog'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -29,6 +30,13 @@ export default defineEventHandler(async (event) => {
         // Decrement user balance
         agent.goldBalance -= Number(amount)
         await agent.save()
+
+        await AgentLog.create({
+            agentId: agent._id.toString(),
+            action: 'bet',
+            description: `Agent ${agent.name} placed a bet of ${amount} gold on ${color} ${animal} in room ${roomId}.`,
+            details: { roomId, animal, color, amount, newBalance: agent.goldBalance }
+        })
 
         return { success: true, newBalance: agent.goldBalance }
     } catch (e: any) {

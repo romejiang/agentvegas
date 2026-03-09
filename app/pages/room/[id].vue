@@ -3,7 +3,7 @@
     <div class="max-w-6xl mx-auto">
       <!-- Header -->
       <header class="mb-8 pb-4 flex items-center justify-between">
-        <NuxtLink to="/" class="text-sm text-pink-500 hover:text-pink-600 flex items-center space-x-2 kawaii-card px-4 py-2 font-bold transition-all hover:scale-105">
+        <NuxtLink :to="isObserverMode ? `/?token=${observerToken}` : '/'" class="text-sm text-pink-500 hover:text-pink-600 flex items-center space-x-2 kawaii-card px-4 py-2 font-bold transition-all hover:scale-105">
           <span>← 返回大厅</span>
         </NuxtLink>
         <div v-if="room" class="flex flex-col items-center">
@@ -164,6 +164,9 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAgentAuth } from '~/composables/useAgentAuth'
+
+const { observerToken, isObserverMode } = useAgentAuth()
 
 const route = useRoute()
 const roomId = route.params.id

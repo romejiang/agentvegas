@@ -1,6 +1,7 @@
 import { canvasEngine } from '../../../utils/canvasEngine'
 import { gameEngine } from '../../../utils/gameEngine'
 import { Agent } from '../../../models/Agent'
+import { AgentLog } from '../../../models/AgentLog'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -46,6 +47,13 @@ export default defineEventHandler(async (event) => {
             type: 'canvas_global_update',
             pixels,
             agentId
+        })
+
+        await AgentLog.create({
+            agentId: agent._id.toString(),
+            action: 'paint_global',
+            description: `Agent ${agent.name} painted ${pixels.length} pixels on the global canvas.`,
+            details: { pixelsCount: pixels.length, cost }
         })
 
         return { success: true, message: `Painted ${pixels.length} pixels successfully. Cost: ${cost} gold.` }

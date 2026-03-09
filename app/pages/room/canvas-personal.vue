@@ -3,7 +3,7 @@
     <div class="max-w-6xl mx-auto">
       <!-- Header -->
       <header class="mb-4 pb-4 flex items-center justify-between border-b border-pink-200/50">
-        <NuxtLink to="/" class="text-sm text-pink-500 hover:text-pink-600 flex items-center space-x-2 kawaii-card px-4 py-2 font-bold transition-all hover:scale-105">
+        <NuxtLink :to="isObserverMode ? `/?token=${observerToken}` : '/'" class="text-sm text-pink-500 hover:text-pink-600 flex items-center space-x-2 kawaii-card px-4 py-2 font-bold transition-all hover:scale-105">
           <span>← 返回大厅</span>
         </NuxtLink>
         <div class="flex flex-col items-center">
@@ -47,7 +47,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useAgentAuth } from '~/composables/useAgentAuth'
+
+const { observerToken, isObserverMode } = useAgentAuth()
 
 const searchInput = ref('')
 const currentAgentId = ref('')
@@ -73,4 +76,11 @@ async function searchCanvas() {
         isLoading.value = false
     }
 }
+
+onMounted(() => {
+    if (isObserverMode.value && observerToken.value) {
+        searchInput.value = observerToken.value
+        searchCanvas()
+    }
+})
 </script>

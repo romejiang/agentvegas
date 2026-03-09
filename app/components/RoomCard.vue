@@ -1,5 +1,5 @@
 <template>
-  <NuxtLink :to="'/room/' + room?.roomId" 
+  <NuxtLink :to="isObserverMode ? `/room/${room?.roomId}?token=${observerToken}` : `/room/${room?.roomId}`" 
     class="block kawaii-card p-6 overflow-hidden transition-all duration-300 group cursor-pointer">
     
     <!-- Soft ambient glow spots -->
@@ -78,6 +78,9 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useAgentAuth } from '~/composables/useAgentAuth'
+
+const { observerToken, isObserverMode } = useAgentAuth()
 
 // Animal name to icon filename mapping
 const ANIMAL_NAME_MAP = { '狮子': 'lion', '熊猫': 'panda', '猴子': 'monkey', '兔子': 'rabbit' }
