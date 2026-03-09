@@ -1,13 +1,19 @@
 import { gameEngine } from '../../utils/gameEngine'
 import { Agent } from '../../models/Agent'
 import { AgentLog } from '../../models/AgentLog'
+import { requireAgentAuth } from '../../utils/auth'
 
 export default defineEventHandler(async (event) => {
+    const authAgentId = requireAgentAuth(event)
     const body = await readBody(event)
     const { agentId, roomId, animal, color, amount } = body
 
     if (!agentId || !roomId || !animal || !color || !amount) {
         throw createError({ statusCode: 400, statusMessage: 'Missing fields' })
+    }
+
+    if (agentId !== authAgentId) {
+        throw createError({ statusCode: 403, statusMessage: 'Forbidden: agentId mismatch' })
     }
 
     if (amount <= 0) {

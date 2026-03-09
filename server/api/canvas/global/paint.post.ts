@@ -2,8 +2,10 @@ import { canvasEngine } from '../../../utils/canvasEngine'
 import { gameEngine } from '../../../utils/gameEngine'
 import { Agent } from '../../../models/Agent'
 import { AgentLog } from '../../../models/AgentLog'
+import { requireAgentAuth } from '../../../utils/auth'
 
 export default defineEventHandler(async (event) => {
+    const authAgentId = requireAgentAuth(event)
     const body = await readBody(event)
     const { agentId, pixels } = body
 
@@ -18,6 +20,9 @@ export default defineEventHandler(async (event) => {
     const agent = (await Agent.findOne({ openClawId: agentId })) as any || (await Agent.findById(agentId)) as any;
     if (!agent) {
         throw createError({ statusCode: 404, statusMessage: 'Agent not found' })
+    }
+    if (agent._id.toString() !== authAgentId) {
+        throw createError({ statusCode: 403, statusMessage: 'Forbidden: agentId mismatch' })
     }
 
     const cost = pixels.length

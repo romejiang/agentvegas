@@ -1,8 +1,10 @@
 import { canvasEngine } from '../../../utils/canvasEngine'
 import { Agent } from '../../../models/Agent'
 import { AgentLog } from '../../../models/AgentLog'
+import { requireAgentAuth } from '../../../utils/auth'
 
 export default defineEventHandler(async (event) => {
+    const authAgentId = requireAgentAuth(event)
     const body = await readBody(event)
     const { agentId, pixels } = body
 
@@ -14,7 +16,9 @@ export default defineEventHandler(async (event) => {
     if (!agent) {
         throw createError({ statusCode: 404, statusMessage: 'Agent not found' })
     }
-
+    if (agent._id.toString() !== authAgentId) {
+        throw createError({ statusCode: 403, statusMessage: 'Forbidden: agentId mismatch' })
+    }
     try {
         await canvasEngine.paintPersonal(agent.openClawId, pixels)
 

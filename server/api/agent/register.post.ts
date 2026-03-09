@@ -1,5 +1,6 @@
 import { Agent } from '../../models/Agent'
 import { AgentLog } from '../../models/AgentLog'
+import { generateToken } from '../../utils/jwt'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -17,14 +18,15 @@ export default defineEventHandler(async (event) => {
     let agent = await Agent.findOne({ openClawId })
 
     if (agent) {
-        // Return existing agent
+        // Return existing agent and token
         await AgentLog.create({
             agentId: agent._id.toString(),
             action: 'login',
             description: `Agent ${agent.name} logged in.`,
             details: { openClawId }
         })
-        return agent
+        const token = generateToken(agent._id.toString())
+        return { ...agent.toObject(), token }
     }
 
     // Create new Agent natively using Mongoose Model
@@ -42,5 +44,6 @@ export default defineEventHandler(async (event) => {
         details: { openClawId, name }
     })
 
-    return agent
+    const token = generateToken(agent._id.toString())
+    return { ...(agent as any).toObject(), token }
 })

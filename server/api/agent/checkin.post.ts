@@ -1,7 +1,9 @@
 import { Agent } from '../../models/Agent'
 import { AgentLog } from '../../models/AgentLog'
+import { requireAgentAuth } from '../../utils/auth'
 
 export default defineEventHandler(async (event) => {
+    const authAgentId = requireAgentAuth(event)
     const body = await readBody(event)
 
     if (!body || !body.agentId) {
@@ -12,6 +14,10 @@ export default defineEventHandler(async (event) => {
     }
 
     const { agentId } = body
+
+    if (agentId !== authAgentId) {
+        throw createError({ statusCode: 403, statusMessage: 'Forbidden: agentId mismatch' })
+    }
 
     const agent = await Agent.findById(agentId)
     if (!agent) {
