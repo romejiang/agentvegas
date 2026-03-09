@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-        await canvasEngine.paintPersonal(agentId, pixels)
+        await canvasEngine.paintPersonal(agent.openClawId, pixels)
 
         await AgentLog.create({
             agentId: agent._id.toString(),

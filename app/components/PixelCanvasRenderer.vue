@@ -1,5 +1,9 @@
 <template>
-  <div class="pixel-canvas-container relative w-full h-[600px] md:h-[800px] bg-gray-900 overflow-hidden border border-pink-500/30 rounded-lg shadow-2xl kawaii-card p-1">
+  <div ref="containerRef" class="pixel-canvas-container relative w-full bg-gray-900 border border-pink-500/30 shadow-2xl kawaii-card p-1"
+       :class="[
+         mode === 'global' ? 'h-[1000px] overflow-hidden rounded-lg' : 'rounded-3xl',
+         mode === 'personal' ? 'flex justify-center items-center py-4' : ''
+       ]">
     <!-- Action Bar -->
     <div class="absolute top-2 left-2 z-50 flex space-x-2">
       <button @click="zoomIn" class="px-3 py-1 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded border border-white/30 text-xs font-bold transition-all text-white">➕</button>
@@ -18,20 +22,26 @@
     <div v-if="hoverInfo.visible && mode === 'global'" 
          class="absolute z-50 bg-gray-900/90 backdrop-blur border border-pink-400 px-3 py-2 rounded shadow-2xl pointer-events-none text-xs flex flex-col whitespace-nowrap"
          :style="{ left: hoverInfo.clientX + 15 + 'px', top: hoverInfo.clientY + 15 + 'px' }">
-      <span class="text-pink-400 font-black mb-1">📍 {{ hoverInfo.x }}, {{ hoverInfo.y }}</span>
-      <span class="text-white">绘制者: <span class="font-bold text-fuchsia-400">{{ hoverInfo.agentId }}</span></span>
+      <div class="flex items-center space-x-2 mb-1">
+        <span class="text-pink-400 font-black">📍 {{ hoverInfo.x }}, {{ hoverInfo.y }}</span>
+        <div v-if="hoverInfo.colorHex" class="w-3 h-3 rounded-sm shadow-sm border border-white/20" :style="{ backgroundColor: hoverInfo.colorHex }"></div>
+      </div>
+      <span class="text-white">绘画人: <span class="font-bold text-fuchsia-400">{{ (agentMap && agentMap[hoverInfo.agentId]) || hoverInfo.agentId }}</span></span>
       <span class="text-white/50 mt-1" style="font-size:10px">{{ hoverInfo.timestamp ? new Date(hoverInfo.timestamp).toLocaleString() : '' }}</span>
     </div>
     
     <div v-if="hoverInfo.visible && mode === 'personal'" 
-         class="absolute z-50 bg-gray-900/90 backdrop-blur border border-pink-400 px-2 py-1 rounded shadow-2xl pointer-events-none text-xs flex flex-col whitespace-nowrap"
+         class="absolute z-50 bg-gray-900/90 backdrop-blur border border-pink-400 px-3 py-2 rounded shadow-2xl pointer-events-none text-xs flex flex-wrap items-center space-x-2"
          :style="{ left: hoverInfo.clientX + 15 + 'px', top: hoverInfo.clientY + 15 + 'px' }">
       <span class="text-pink-400 font-black">📍 {{ hoverInfo.x }}, {{ hoverInfo.y }}</span>
+      <div v-if="hoverInfo.colorHex" class="w-4 h-4 rounded shadow-sm border border-white/20" :style="{ backgroundColor: hoverInfo.colorHex }"></div>
     </div>
 
-    <!-- Scroll & Pan Area -->
-    <div ref="scrollBox" class="w-full h-full overflow-auto relative scroll-smooth inner-scroll" @mousemove="onMouseMove" @mouseleave="hoverInfo.visible = false">
-      <div class="canvas-wrapper relative origin-top-left transition-transform duration-200"
+    <div ref="scrollBox" class="w-full h-full relative scroll-smooth inner-scroll" 
+         :class="mode === 'global' ? 'overflow-x-auto overflow-y-hidden' : 'overflow-hidden flex justify-center items-center'"
+         @mousemove="onMouseMove" @mouseleave="hoverInfo.visible = false">
+      <div ref="canvasWrapper" class="canvas-wrapper relative transition-transform duration-200"
+           :class="mode === 'global' ? 'origin-top-left' : 'origin-center rounded-xl overflow-hidden ring-2 ring-pink-500/20'"
            :style="{
              width: totalWidth + 'px',
              height: totalHeight + 'px',
@@ -60,6 +70,10 @@ const props = defineProps({
     type: Object, // Record<string, any> e.g. "x,y" => colorIndex or {color, agentId, timestamp}
     default: () => ({})
   },
+  agentMap: {
+    type: Object, // Record<string, string> agentId => agentName
+    default: () => ({})
+  },
   mode: {
     type: String,
     default: 'personal' // 'personal' or 'global'
@@ -76,7 +90,9 @@ const props = defineProps({
 
 const CHUNK_WIDTH = 1000
 const zoom = ref(1) // Default zoom: 1 pixel = 1 screen pixel
+const containerRef = ref(null)
 const scrollBox = ref(null)
+const canvasWrapper = ref(null)
 const canvasRefs = ref({})
 const ctxCache = {}
 const palette = usePalette()
@@ -88,7 +104,8 @@ const hoverInfo = ref({
   clientX: 0,
   clientY: 0,
   agentId: '',
-  timestamp: null
+  timestamp: null,
+  colorHex: null
 })
 
 // Calculate how many 1000px chunks we need to render the width
@@ -132,12 +149,14 @@ function drawAllPixels() {
 
   // Iterate sparse matrix and paint
   for (const [key, value] of Object.entries(props.pixels)) {
-    const coords = key.split(',')
+    // If the backend returns keys with 'pixels.' prefix like "pixels.100,50" we strip it out
+    const cleanKey = key.replace('pixels.', '')
+    const coords = cleanKey.split(',')
     const x = parseInt(coords[0], 10)
     const y = parseInt(coords[1], 10)
     
     // Bounds check
-    if (x < 0 || x >= props.totalWidth || y < 0 || y >= props.totalHeight) continue
+    if (isNaN(x) || isNaN(y) || x < 0 || x >= props.totalWidth || y < 0 || y >= props.totalHeight) continue
 
     const chunkIdx = Math.floor(x / CHUNK_WIDTH)
     const localX = x % CHUNK_WIDTH
@@ -195,36 +214,60 @@ function paintDelta(updates) { // updates: [{x, y, color}]
 }
 defineExpose({ paintDelta })
 
+import { nextTick } from 'vue'
+
 onMounted(() => {
-  drawAllPixels()
+  nextTick(() => {
+    drawAllPixels()
+  })
 })
 
 // --- Interactions --- //
 function onMouseMove(e) {
-  if (!scrollBox.value) return
+  if (!canvasWrapper.value || !containerRef.value) return
   
-  const rect = scrollBox.value.getBoundingClientRect()
-  // e.clientX is view port relative. 
-  // We want coordinates inside scroll box considering scroll and zoom scale.
+  const wrapperRect = canvasWrapper.value.getBoundingClientRect()
+  const containerRect = containerRef.value.getBoundingClientRect()
   
-  const mouseX = e.clientX - rect.left + scrollBox.value.scrollLeft
-  const mouseY = e.clientY - rect.top + scrollBox.value.scrollTop
+  const mouseX = e.clientX - wrapperRect.left
+  const mouseY = e.clientY - wrapperRect.top
   
+  // Use explicitly tracked zoom value instead of derived width, avoiding browser rect capping limitations
   const trueX = Math.floor(mouseX / zoom.value)
   const trueY = Math.floor(mouseY / zoom.value)
 
   if (trueX >= 0 && trueX < props.totalWidth && trueY >= 0 && trueY < props.totalHeight) {
     const key = `${trueX},${trueY}`
-    const pData = props.pixels[key]
+    let pData = props.pixels[key]
+    if (pData === undefined) {
+      pData = props.pixels[`pixels.${key}`]
+    }
 
-    hoverInfo.value = {
-      visible: true,
-      x: trueX,
-      y: trueY,
-      clientX: e.clientX - rect.left,
-      clientY: e.clientY - rect.top,
-      agentId: pData?.agentId || 'Unknown',
-      timestamp: pData?.timestamp || null
+    if (pData !== undefined) {
+      let colorIndex = 0
+      let agentId = 'Unknown'
+      let timestamp = null
+      
+      if (typeof pData === 'object' && pData !== null) {
+          colorIndex = pData.color !== undefined ? pData.color : 0
+          agentId = pData.agentId || 'Unknown'
+          timestamp = pData.timestamp || null
+      } else if (typeof pData === 'number') {
+          colorIndex = pData
+      }
+
+      hoverInfo.value = {
+        visible: true,
+        x: trueX,
+        y: trueY,
+        clientX: e.clientX - containerRect.left,
+        clientY: e.clientY - containerRect.top,
+        agentId,
+        timestamp,
+        colorHex: palette[colorIndex] || null
+      }
+    } else {
+      hoverInfo.value.visible = false
     }
   } else {
     hoverInfo.value.visible = false

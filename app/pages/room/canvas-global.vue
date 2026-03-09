@@ -39,7 +39,7 @@
         <!-- Render Global Canvas here -->
         <div v-if="!isInitialLoading" class="w-full relative shadow-lg rounded-xl overflow-hidden ring-4 ring-pink-100">
             <!-- 50000 width global canvas -->
-            <PixelCanvasRenderer ref="renderer" mode="global" :pixels="pixelsData" :totalWidth="50000" :totalHeight="1000" />
+            <PixelCanvasRenderer ref="renderer" mode="global" :pixels="pixelsData" :agentMap="agentMapData" :totalWidth="50000" :totalHeight="1000" />
         </div>
         
         <div v-else class="flex flex-col justify-center items-center h-64 text-pink-400/50 font-bold text-lg animate-pulse w-full kawaii-card">
@@ -63,6 +63,7 @@ const { observerToken, isObserverMode } = useAgentAuth()
 const isConnected = ref(false)
 const isInitialLoading = ref(true)
 const pixelsData = ref({})
+const agentMapData = ref({})
 const renderer = ref(null)
 
 let ws = null
@@ -74,6 +75,7 @@ onMounted(async () => {
         const res = await $fetch('/api/canvas/global?startChunk=0&endChunk=499')
         if (res.success && res.pixels) {
             pixelsData.value = res.pixels
+            if (res.agentMap) agentMapData.value = res.agentMap
         }
     } catch (e) {
         console.error('Failed to load global canvas', e)
@@ -91,6 +93,11 @@ onMounted(async () => {
         try {
             const parsedMsg = JSON.parse(event.data)
             if (parsedMsg.type === 'canvas_global_update' && parsedMsg.pixels) {
+                // Keep the agentMap updated in real-time
+                if (parsedMsg.agentId && parsedMsg.agentName) {
+                    agentMapData.value[parsedMsg.agentId] = parsedMsg.agentName
+                }
+                
                 // Efficiently patch the view by calling the exposed draw partial method
                 // Note: we add agentId to each pixel to inject global mode tracking 
                 const decoratedPixels = parsedMsg.pixels.map(p => ({

@@ -1,14 +1,19 @@
 import { canvasEngine } from '../../../utils/canvasEngine'
 
-export default defineEventHandler(async (event) => {
-    const agentId = getRouterParam(event, 'agentId')
+import { Agent } from '../../../models/Agent'
 
-    if (!agentId) {
+export default defineEventHandler(async (event) => {
+    const agentParam = getRouterParam(event, 'agentId')
+
+    if (!agentParam) {
         throw createError({ statusCode: 400, statusMessage: 'Missing agentId' })
     }
 
     try {
-        const pixels = await canvasEngine.getPersonalCanvas(agentId)
+        const agent = await Agent.findOne({ openClawId: agentParam }) as any || await Agent.findById(agentParam).catch(() => null) as any;
+        const targetId = agent ? agent.openClawId : agentParam;
+
+        const pixels = await canvasEngine.getPersonalCanvas(targetId)
         return { success: true, pixels }
     } catch (e: any) {
         throw createError({ statusCode: 500, statusMessage: e.message })

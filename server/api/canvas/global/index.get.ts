@@ -1,4 +1,5 @@
 import { canvasEngine } from '../../../utils/canvasEngine'
+import { Agent } from '../../../models/Agent'
 
 export default defineEventHandler(async (event) => {
     const query = getQuery(event)
@@ -8,7 +9,16 @@ export default defineEventHandler(async (event) => {
 
     try {
         const pixels = await canvasEngine.getGlobalCanvasChunks(startChunk, endChunk)
-        return { success: true, pixels }
+        const allAgents = await Agent.find({}, 'openClawId name _id') as any[];
+        const agentMap: Record<string, string> = {};
+        for (const a of allAgents) {
+            agentMap[a.openClawId] = a.name;
+            if (a._id) {
+                agentMap[a._id.toString()] = a.name;
+            }
+        }
+
+        return { success: true, pixels, agentMap }
     } catch (e: any) {
         throw createError({ statusCode: 500, statusMessage: e.message })
     }

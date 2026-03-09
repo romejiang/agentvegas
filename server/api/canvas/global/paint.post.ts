@@ -40,13 +40,13 @@ export default defineEventHandler(async (event) => {
             }
         )
 
-        await canvasEngine.paintGlobal(agentId, pixels)
+        await canvasEngine.paintGlobal(agent.openClawId, pixels)
 
         // Broadcast to clients
         gameEngine.broadcast('[GLOBAL_CANVAS]', {
             type: 'canvas_global_update',
             pixels,
-            agentId
+            agentId: agent.openClawId
         })
 
         await AgentLog.create({
