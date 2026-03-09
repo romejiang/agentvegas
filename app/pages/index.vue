@@ -33,10 +33,15 @@
                    ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.6)]' 
                    : 'bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.6)]'">
             </div>
-            <span class="text-sm font-bold tracking-wider" 
-                  :class="isConnected ? 'text-emerald-500' : 'text-red-400'">
-              {{ isConnected ? '在线' : '离线' }}
-            </span>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm font-bold tracking-wider" 
+                    :class="isConnected ? 'text-emerald-500' : 'text-red-400'">
+                {{ isConnected ? '在线' : '离线' }}
+              </span>
+              <span v-if="isConnected" class="px-1.5 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-600 font-black">
+                {{ onlineCount }}
+              </span>
+            </div>
           </div>
         </div>
       </header>
@@ -75,7 +80,7 @@
       
       <!-- Bottom log panel -->
       <div class="fixed bottom-0 left-0 w-full backdrop-blur-xl border-t border-pink-200/50 transition-all duration-300 z-20 pointer-events-none"
-           :class="isLogCollapsed ? 'h-12' : 'h-32'"
+           :class="isLogCollapsed ? 'h-12' : 'h-64'"
            style="background: linear-gradient(to top, rgba(255,240,245,0.95), rgba(255,240,245,0.7));">
         <div class="max-w-7xl mx-auto h-full relative px-4 py-2 flex flex-col justify-end">
           <button @click="isLogCollapsed = !isLogCollapsed" 
@@ -83,17 +88,20 @@
             {{ isLogCollapsed ? '展开日志 ▲' : '收起日志 ▼' }}
           </button>
           
-          <div v-if="!isLogCollapsed" class="flex flex-col justify-end h-full overflow-hidden w-[85%] pb-1">
+          <div v-if="!isLogCollapsed" class="flex flex-col justify-end h-full overflow-hidden w-[95%] pb-2 pt-10 pointer-events-auto">
             <div v-for="(log, i) in logHistory" :key="i" 
-                 class="text-xs mb-1 font-semibold truncate animate-fade-in"
-                 :class="log.includes('ERROR') || log.includes('❌') ? 'text-red-400' : 'text-pink-500/70'">
-              {{ log }}
+                 class="text-xs mb-1.5 font-semibold truncate animate-fade-in flex items-center space-x-2">
+              <span class="text-pink-300 font-mono">[{{ new Date(log.createdAt).toLocaleTimeString([], { hour12: false }) }}]</span>
+              <span class="text-pink-600 font-bold px-1.5 py-0.5 bg-pink-100 rounded text-[10px]">{{ log.agentName }}</span>
+              <span class="text-pink-500/70">{{ log.description }}</span>
             </div>
           </div>
           <div v-else class="flex flex-col justify-center h-full w-[75%] md:w-[85%]">
-            <span class="text-xs font-semibold text-pink-500/70 truncate">
-               <span class="animate-pulse mr-1">💬</span> {{ latestLog }}
+            <span v-if="latestLog" class="text-xs font-bold text-pink-500/70 truncate">
+               <span class="animate-pulse mr-1">💬</span> 
+               <span class="text-pink-600">[{{ latestLog.agentName }}]</span> {{ latestLog.description }}
             </span>
+            <span v-else class="text-xs font-semibold text-pink-500/70">系统运行中...</span>
           </div>
         </div>
       </div>
@@ -108,9 +116,10 @@ import { useAgentAuth } from '~/composables/useAgentAuth'
 const { isObserverMode, observerToken } = useAgentAuth()
 
 const isConnected = ref(false)
+const onlineCount = ref(0)
 const rooms = ref(new Map())
-const logs = ref([])
-const isLogCollapsed = ref(false)
+const agentLogs = ref([])
+const isLogCollapsed = ref(true)
 
 const roomList = computed(() => {
   return Array.from(rooms.value.values()).sort((a, b) => {
@@ -119,17 +128,20 @@ const roomList = computed(() => {
 })
 
 const logHistory = computed(() => {
-  return logs.value.slice(-5)
+  return agentLogs.value.slice(0, 10).reverse()
 })
 
 const latestLog = computed(() => {
-  return logs.value.length > 0 ? logs.value[logs.value.length - 1] : '系统启动中...'
+  return agentLogs.value.length > 0 ? agentLogs.value[0] : null
 })
 
-function addLog(msg) {
-  const ts = new Date().toLocaleTimeString('en-US', { hour12: false })
-  logs.value.push(`[${ts}] ${msg}`)
-  if (logs.value.length > 50) logs.value.shift()
+async function fetchLogs() {
+  try {
+    const data = await $fetch('/api/agent/logs')
+    agentLogs.value = data.logs || []
+  } catch (e) {
+    console.error('Failed to fetch agent logs', e)
+  }
 }
 
 // Initial hydration using SSR safe ref
@@ -140,21 +152,22 @@ if (data.value && data.value.rooms) {
   }
 }
 
+// Fetch online count
+const { data: onlineData } = await useFetch('/api/agent/online-count')
+if (onlineData.value) {
+  onlineCount.value = onlineData.value.count
+}
+
 // Client-side WebSockets hook
 let ws = null
 onMounted(() => {
-  addLog(`✅ 已加载 ${rooms.value.size} 个房间`)
-  
-  if (error.value) {
-    addLog(`❌ HTTP 同步错误: ${error.value.message}`)
-  }
+  fetchLogs()
 
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
   ws = new WebSocket(`${protocol}//${window.location.host}/ws`)
   
   ws.onopen = () => {
     isConnected.value = true
-    addLog('🔗 WebSocket 连接已建立')
   }
   
   ws.onmessage = (event) => {
@@ -164,7 +177,7 @@ onMounted(() => {
         rooms.value.set(parsedMsg.room.roomId, parsedMsg.room)
       } 
       else if (parsedMsg.type === 'rolling') {
-        addLog(`🎲 房间开奖 >> ${parsedMsg.color} ${parsedMsg.animal}`)
+        // Rolling update handled by room status, but we could add log if needed
       }
     } catch (e) {
       console.error('WS Parse Error', e)
@@ -173,8 +186,25 @@ onMounted(() => {
   
   ws.onclose = () => {
     isConnected.value = false
-    addLog('⚠️ 连接已断开，等待重连...')
   }
+
+  // Refresh online count every 30 seconds
+  const countInterval = setInterval(async () => {
+    try {
+      const data = await $fetch('/api/agent/online-count')
+      onlineCount.value = data.count
+    } catch (e) {
+      console.error('Failed to refresh online count', e)
+    }
+  }, 30000)
+
+  // Refresh agent logs every 5 seconds
+  const logsInterval = setInterval(fetchLogs, 5000)
+
+  onBeforeUnmount(() => {
+    clearInterval(countInterval)
+    clearInterval(logsInterval)
+  })
 })
 
 onBeforeUnmount(() => {
