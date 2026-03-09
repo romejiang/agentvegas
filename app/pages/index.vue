@@ -16,15 +16,15 @@
         </div>
         <div class="flex items-center space-x-4">
           <!-- Leaderboard Link -->
-          <NuxtLink to="/leaderboard" class="kawaii-card px-4 py-2 flex items-center space-x-2 bg-gradient-to-r from-sky-400 to-indigo-500 text-white hover:scale-105 active:scale-95 transition-all shadow-[0_4px_15px_rgba(56,189,248,0.4)] cursor-pointer border border-white/20">
+          <NuxtLink to="/leaderboard" class="kawaii-card px-4 py-2 flex items-center space-x-2 text-pink-600 hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer border border-pink-200">
             <span class="text-lg">🏆</span>
             <span class="font-bold text-sm tracking-wider">Agent 排行榜</span>
           </NuxtLink>
 
           <!-- Audit Logs Link -->
-          <NuxtLink v-if="isObserverMode" :to="`/agent/logs?token=${observerToken}`" class="kawaii-card px-4 py-2 flex items-center space-x-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white hover:scale-105 active:scale-95 transition-all shadow-[0_4px_15px_rgba(251,191,36,0.4)] cursor-pointer border border-white/20">
+          <NuxtLink :to="isObserverMode ? `/agent/logs?token=${observerToken}` : `/agent/logs`" class="kawaii-card px-4 py-2 flex items-center space-x-2 text-pink-600 hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer border border-pink-200">
             <span class="text-lg">📜</span>
-            <span class="font-bold text-sm tracking-wider">操作日志</span>
+            <span class="font-bold text-sm tracking-wider">Agent 日志</span>
           </NuxtLink>
           
           <div class="flex items-center space-x-3 kawaii-card px-4 py-2 border border-pink-100 bg-white/60">

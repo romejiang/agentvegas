@@ -27,12 +27,14 @@
 
 <script setup>
 import { watch, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAgentAuth } from '~/composables/useAgentAuth'
 
 const { isObserverMode, observerToken } = useAgentAuth()
 const agentInfo = ref(null)
+const route = useRoute()
 
-watch(observerToken, async (token) => {
+const fetchAgentInfo = async (token) => {
   if (token) {
     try {
       const data = await $fetch(`/api/agent/info?token=${token}`)
@@ -41,7 +43,15 @@ watch(observerToken, async (token) => {
       console.error('Failed to load observer agent info', e)
     }
   }
-}, { immediate: true })
+}
+
+watch(observerToken, fetchAgentInfo, { immediate: true })
+
+watch(() => route.path, () => {
+  if (observerToken.value) {
+    fetchAgentInfo(observerToken.value)
+  }
+})
 </script>
 
 <style>

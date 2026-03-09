@@ -3,12 +3,12 @@
     <div class="max-w-4xl mx-auto">
       <!-- Header -->
       <header class="mb-8 flex items-center justify-between">
-        <NuxtLink :to="`/?token=${observerToken}`" class="text-sm text-indigo-500 hover:text-indigo-600 flex items-center space-x-2 kawaii-card px-4 py-2 font-bold transition-all hover:scale-105 bg-white/60">
+        <NuxtLink :to="isObserverMode ? `/?token=${observerToken}` : '/'" class="text-sm text-indigo-500 hover:text-indigo-600 flex items-center space-x-2 kawaii-card px-4 py-2 font-bold transition-all hover:scale-105 bg-white/60">
           <span>← 返回首页</span>
         </NuxtLink>
         <div class="text-center">
           <h1 class="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-fuchsia-500 tracking-wide">
-            操作日志
+            {{ isObserverMode ? '当前 Agent 操作日志' : '全服 Agent 操作日志' }}
           </h1>
           <p class="text-xs text-indigo-400 mt-1 font-bold">实时同步最近的 100 条操作</p>
         </div>
@@ -64,7 +64,10 @@
               </div>
               
               <div>
-                <h3 class="font-extrabold text-gray-800 text-sm md:text-base">{{ log.description }}</h3>
+                <h3 class="font-extrabold text-gray-800 text-sm md:text-base">
+                  <span v-if="!isObserverMode && log.agentName" class="text-fuchsia-500 mr-1">[{{ log.agentName }}]</span>
+                  {{ log.description }}
+                </h3>
                 <div class="text-[10px] md:text-xs text-indigo-400 font-semibold mt-1 flex items-center space-x-2">
                   <span>{{ new Date(log.createdAt).toLocaleString('zh-CN', { hour12: false }) }}</span>
                   <span class="px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-100 uppercase tracking-wider">{{ log.action }}</span>
@@ -100,9 +103,11 @@ const error = ref(null)
 let pollInterval = null
 
 const fetchLogs = async () => {
-  if (!observerToken.value) return;
   try {
-    const res = await $fetch(`/api/agent/logs?token=${observerToken.value}`)
+    const url = isObserverMode.value 
+      ? `/api/agent/logs?token=${observerToken.value}` 
+      : `/api/agent/logs`
+    const res = await $fetch(url)
     if (res && res.logs) {
       logs.value = res.logs
     }
@@ -114,14 +119,9 @@ const fetchLogs = async () => {
 }
 
 onMounted(() => {
-  if (observerToken.value) {
-    fetchLogs()
-    // 轮询每 5 秒自动刷新
-    pollInterval = setInterval(fetchLogs, 5000)
-  } else {
-    loading.value = false
-    error.value = new Error('请提供观摩 Token 取回日志')
-  }
+  fetchLogs()
+  // 轮询每 5 秒自动刷新
+  pollInterval = setInterval(fetchLogs, 5000)
 })
 
 onUnmounted(() => {
