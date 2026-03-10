@@ -2,7 +2,7 @@
   <div class="min-h-screen px-6 pt-6 pb-[200px] md:px-8 md:pt-8 md:pb-[200px]">
     <div class="max-w-7xl mx-auto">
       <!-- Header -->
-      <header class="mb-10 pb-6 flex items-center justify-between">
+      <header class="mb-10 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h1 class="text-4xl md:text-5xl font-black tracking-tight">
             <span class="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-rose-400 to-fuchsia-500">
@@ -14,7 +14,7 @@
             🎰 {{ $t('header.subtitle') }}
           </p>
         </div>
-        <div class="flex items-center space-x-4">
+        <div class="flex flex-wrap items-center gap-3 md:gap-4">
           <!-- Leaderboard Link -->
           <NuxtLink to="/leaderboard" class="kawaii-card px-4 py-2 flex items-center space-x-2 text-pink-600 hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer border border-pink-200">
             <span class="text-lg">🏆</span>
