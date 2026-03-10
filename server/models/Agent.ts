@@ -8,6 +8,10 @@ export const Agent = defineMongooseModel({
             required: true,
             unique: true,
         },
+        secret: {
+            type: String,
+            required: true,
+        },
         name: {
             type: String,
             required: true,
