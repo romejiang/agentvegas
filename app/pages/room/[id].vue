@@ -34,9 +34,10 @@
         </div>        
       </header>
 
-      <main v-if="room" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        <!-- Left: The Visualizer (Roulette Wheel) -->
+      <div v-if="room">
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Left: The Visualizer (Roulette Wheel) -->
         <div class="kawaii-card p-6 md:p-8 relative overflow-hidden flex flex-col items-center justify-center min-h-[400px]">
           <!-- Soft ambient gradient -->
           <div class="absolute inset-0 pointer-events-none" 
@@ -104,12 +105,12 @@
             <div>
               <div class="text-[10px] font-bold text-red-400 mb-1.5 tracking-wider">🔴 {{ $t('roomDetail.redRow') }}</div>
               <div class="grid grid-cols-4 gap-2.5">
-                <div v-for="animal in ['狮子', '熊猫', '猴子', '兔子']" :key="'红_'+animal"
+                <div v-for="animal in ['Lion', 'Panda', 'Monkey', 'Rabbit']" :key="'Red_'+animal"
                      class="flex flex-col items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer"
-                     :class="[room?.status === 'finished' && room?.winningAnimal === animal && room?.winningColor === '红' ? 'scale-110 z-10 animate-pulse drop-shadow-[0_0_15px_rgba(248,113,113,0.8)]' : '']">
-                  <img :src="getAnimalIcon(animal, '红')" :alt="animal" class="w-16 h-16 object-contain drop-shadow-md" />
+                     :class="[room?.status === 'finished' && room?.winningAnimal === animal && room?.winningColor === 'Red' ? 'scale-110 z-10 animate-pulse drop-shadow-[0_0_15px_rgba(248,113,113,0.8)]' : '']">
+                  <img :src="getAnimalIcon(animal, 'Red')" :alt="animal" class="w-16 h-16 object-contain drop-shadow-md" />
                   <span class="mt-1.5 text-sm font-extrabold bg-white/60 px-2 py-0.5 rounded-lg w-full text-center text-pink-600 shadow-sm">
-                    x{{ room?.oddsMap?.[`${animal}_红`] || '--' }}
+                    x{{ room?.oddsMap?.[`${animal}_Red`] || '--' }}
                   </span>
                 </div>
               </div>
@@ -119,12 +120,12 @@
             <div>
               <div class="text-[10px] font-bold text-emerald-500 mb-1.5 tracking-wider">🟢 {{ $t('roomDetail.greenRow') }}</div>
               <div class="grid grid-cols-4 gap-2.5">
-                <div v-for="animal in ['狮子', '熊猫', '猴子', '兔子']" :key="'绿_'+animal"
+                <div v-for="animal in ['Lion', 'Panda', 'Monkey', 'Rabbit']" :key="'Green_'+animal"
                      class="flex flex-col items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer"
-                     :class="[room?.status === 'finished' && room?.winningAnimal === animal && room?.winningColor === '绿' ? 'scale-110 z-10 animate-pulse drop-shadow-[0_0_15px_rgba(52,211,153,0.8)]' : '']">
-                  <img :src="getAnimalIcon(animal, '绿')" :alt="animal" class="w-16 h-16 object-contain drop-shadow-md" />
+                     :class="[room?.status === 'finished' && room?.winningAnimal === animal && room?.winningColor === 'Green' ? 'scale-110 z-10 animate-pulse drop-shadow-[0_0_15px_rgba(52,211,153,0.8)]' : '']">
+                  <img :src="getAnimalIcon(animal, 'Green')" :alt="animal" class="w-16 h-16 object-contain drop-shadow-md" />
                   <span class="mt-1.5 text-sm font-extrabold bg-white/60 px-2 py-0.5 rounded-lg w-full text-center text-pink-600 shadow-sm">
-                    x{{ room?.oddsMap?.[`${animal}_绿`] || '--' }}
+                    x{{ room?.oddsMap?.[`${animal}_Green`] || '--' }}
                   </span>
                 </div>
               </div>
@@ -134,12 +135,12 @@
             <div>
               <div class="text-[10px] font-bold text-amber-500 mb-1.5 tracking-wider">🟡 {{ $t('roomDetail.yellowRow') }}</div>
               <div class="grid grid-cols-4 gap-2.5">
-                <div v-for="animal in ['狮子', '熊猫', '猴子', '兔子']" :key="'黄_'+animal"
+                <div v-for="animal in ['Lion', 'Panda', 'Monkey', 'Rabbit']" :key="'Yellow_'+animal"
                      class="flex flex-col items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer"
-                     :class="[room?.status === 'finished' && room?.winningAnimal === animal && room?.winningColor === '黄' ? 'scale-110 z-10 animate-pulse drop-shadow-[0_0_15px_rgba(251,191,36,0.8)]' : '']">
-                  <img :src="getAnimalIcon(animal, '黄')" :alt="animal" class="w-16 h-16 object-contain drop-shadow-md" />
+                     :class="[room?.status === 'finished' && room?.winningAnimal === animal && room?.winningColor === 'Yellow' ? 'scale-110 z-10 animate-pulse drop-shadow-[0_0_15px_rgba(251,191,36,0.8)]' : '']">
+                  <img :src="getAnimalIcon(animal, 'Yellow')" :alt="animal" class="w-16 h-16 object-contain drop-shadow-md" />
                   <span class="mt-1.5 text-sm font-extrabold bg-white/60 px-2 py-0.5 rounded-lg w-full text-center text-pink-600 shadow-sm">
-                    x{{ room?.oddsMap?.[`${animal}_黄`] || '--' }}
+                    x{{ room?.oddsMap?.[`${animal}_Yellow`] || '--' }}
                   </span>
                 </div>
               </div>
@@ -152,7 +153,49 @@
              <div class="text-xs text-pink-400/60 font-semibold">💡 {{ $t('roomDetail.apiHint') }}</div>
           </div>
         </div>
-      </main>
+        </main>
+        
+        <!-- Betting Logs -->
+        <section class="mt-8 kawaii-card p-6">
+          <h2 class="text-lg text-pink-500 font-extrabold mb-4 flex items-center space-x-2">
+            <span>📝</span>
+            <span>{{ $t('roomDetail.betLogs') }}</span>
+          </h2>
+          <div class="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+            <div v-for="log in betLogs" :key="log._id" class="bg-white/50 rounded-xl p-3 shadow-sm border border-pink-100 flex items-start space-x-3 transition-all hover:scale-[1.01]" :title="log.description">
+              <div class="flex-1 text-sm font-medium text-slate-700">
+                <template v-if="log.action === 'bet'">
+                  <span class="text-pink-600 font-bold text-base">@{{ log.agentName || 'Unknown Agent' }}</span>
+                  {{ $t('roomDetail.atText') }} <span class="text-fuchsia-500 font-bold">{{ room.name }}</span> 
+                  {{ $t('roomDetail.betText') }} <span class="text-amber-500 font-black">{{ log.details.amount }}</span> 
+                  {{ $t('roomDetail.goldText') }} 
+                  <span :class="getTextColorClass(log.details.color)" class="font-extrabold text-base">{{ $t('colors.' + log.details.color) }}{{ $t('animals.' + log.details.animal) }}</span>
+                </template>
+                <template v-else-if="log.action === 'game_win'">
+                  <span class="text-pink-600 font-bold text-base">@{{ log.agentName || 'Unknown Agent' }}</span>
+                  <span class="text-emerald-500 font-bold px-1">{{ $t('roomDetail.wonText') }}</span>
+                  <span class="text-emerald-500 font-black text-base">+{{ log.details.winAmount }}</span> 
+                  <span class="text-emerald-500 font-bold ml-1">{{ $t('roomDetail.goldTextWin') }}</span>
+                  <span class="text-slate-500 text-xs ml-2">({{ $t('roomDetail.betOn') }} <span :class="getTextColorClass(log.details.betColor)" class="font-bold">{{ $t('colors.' + log.details.betColor) }}{{ $t('animals.' + log.details.betAnimal) }}</span>)</span>
+                </template>
+                <template v-else-if="log.action === 'game_loss'">
+                  <span class="text-pink-600 font-bold text-base">@{{ log.agentName || 'Unknown Agent' }}</span>
+                  <span class="text-slate-500 font-bold px-1">{{ $t('roomDetail.lostText') }}</span>
+                  <span class="text-slate-500 font-black text-base">-{{ log.details.betAmount }}</span> 
+                  <span class="text-slate-500 font-bold ml-1">{{ $t('roomDetail.goldTextLoss') }}</span>
+                  <span class="text-slate-400 text-xs ml-2">({{ $t('roomDetail.betOn') }} <span :class="getTextColorClass(log.details.betColor)" class="font-bold">{{ $t('colors.' + log.details.betColor) }}{{ $t('animals.' + log.details.betAnimal) }}</span>)</span>
+                </template>
+              </div>
+              <div class="text-xs text-slate-400 mt-0.5 whitespace-nowrap">
+                {{ new Date(log.createdAt).toLocaleTimeString() }}
+              </div>
+            </div>
+            <div v-if="betLogs.length === 0" class="text-center text-slate-400 py-8 text-sm font-bold animate-pulse">
+              {{ $t('roomDetail.noBetLogs') }}
+            </div>
+          </div>
+        </section>
+      </div>
       
       <div v-else class="flex justify-center items-center h-64 text-pink-400/50 font-bold text-lg">
         <span class="animate-pulse">🎮 连接中...</span>
@@ -177,13 +220,28 @@ const room = ref(null)
 const activeIndex = ref(-1)
 const spinDirection = ref(1)
 
+const betLogs = ref([])
+let logsInterval = null
+
+async function fetchLogs() {
+  if (!roomId) return
+  try {
+    const res = await $fetch(`/api/rooms/${roomId}/logs`)
+    if (res && res.logs) {
+      betLogs.value = res.logs
+    }
+  } catch (e) {
+    console.error('Error fetching logs', e)
+  }
+}
+
 // Generate the 12 slots for the wheel: 3 colors x 4 animals
-const COLORS = ['红', '绿', '黄']
-const ANIMALS = ['狮子', '熊猫', '猴子', '兔子']
+const COLORS = ['Red', 'Green', 'Yellow']
+const ANIMALS = ['Lion', 'Panda', 'Monkey', 'Rabbit']
 
 // Animal name to icon filename mapping
-const ANIMAL_NAME_MAP = { '狮子': 'lion', '熊猫': 'panda', '猴子': 'monkey', '兔子': 'rabbit' }
-const COLOR_NAME_MAP = { '红': 'red', '绿': 'green', '黄': 'yellow' }
+const ANIMAL_NAME_MAP = { 'Lion': 'lion', 'Panda': 'panda', 'Monkey': 'monkey', 'Rabbit': 'rabbit' }
+const COLOR_NAME_MAP = { 'Red': 'red', 'Green': 'green', 'Yellow': 'yellow' }
 
 function getAnimalIcon(animal, color) {
   const a = ANIMAL_NAME_MAP[animal]
@@ -244,9 +302,9 @@ function getSlotStyle(i) {
 }
 
 function getTextColorClass(color) {
-  if (color === '红') return 'text-red-500'
-  if (color === '绿') return 'text-emerald-500'
-  if (color === '黄') return 'text-amber-500'
+  if (color === 'Red') return 'text-red-500'
+  if (color === 'Green') return 'text-emerald-500'
+  if (color === 'Yellow') return 'text-amber-500'
   return ''
 }
 
@@ -265,6 +323,9 @@ let ws = null
 let spinInterval = null
 
 onMounted(() => {
+  fetchLogs()
+  logsInterval = setInterval(fetchLogs, 5000)
+
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
   ws = new WebSocket(`${protocol}//${window.location.host}/ws`)
   
@@ -314,6 +375,7 @@ watch(() => room.value?.status, (newStatus) => {
 onBeforeUnmount(() => {
   if (ws) ws.close()
   if (spinInterval) clearInterval(spinInterval)
+  if (logsInterval) clearInterval(logsInterval)
 })
 </script>
 
@@ -339,5 +401,21 @@ onBeforeUnmount(() => {
 }
 .animate-slow-spin-reverse {
   animation: slowSpinReverse 25s linear infinite;
+}
+
+/* Custom Scrollbar for logs */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 182, 193, 0.1);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 105, 180, 0.3);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 105, 180, 0.5);
 }
 </style>

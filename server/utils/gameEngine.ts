@@ -27,16 +27,19 @@ export interface RoomState {
     interval: NodeJS.Timeout | null
 }
 
-const ANIMALS = ['狮子', '熊猫', '猴子', '兔子']
-const COLORS = ['红', '绿', '黄']
+const ANIMALS = ['Lion', 'Panda', 'Monkey', 'Rabbit']
+const COLORS = ['Red', 'Green', 'Yellow']
 
-export const EN_ANIMALS: Record<string, string> = { '狮子': 'Lion', '熊猫': 'Panda', '猴子': 'Monkey', '兔子': 'Rabbit' }
-export const EN_COLORS: Record<string, string> = { '红': 'Red', '绿': 'Green', '黄': 'Yellow' }
-export const EN_TYPES: Record<string, string> = { '森林舞会': 'Forest Party' }
+export const EN_ANIMALS: Record<string, string> = { 'Lion': 'Lion', 'Panda': 'Panda', 'Monkey': 'Monkey', 'Rabbit': 'Rabbit' }
+export const EN_COLORS: Record<string, string> = { 'Red': 'Red', 'Green': 'Green', 'Yellow': 'Yellow' }
+export const EN_TYPES: Record<string, string> = { 'Forest Party': 'Forest Party' }
 
-export function enA(val: string) { return EN_ANIMALS[val] || val }
-export function enC(val: string) { return EN_COLORS[val] || val }
-export function enT(val: string) { return EN_TYPES[val] || val }
+const ZH_TO_EN_ANIMALS: Record<string, string> = { '狮子': 'Lion', '熊猫': 'Panda', '猴子': 'Monkey', '兔子': 'Rabbit' }
+const ZH_TO_EN_COLORS: Record<string, string> = { '红': 'Red', '绿': 'Green', '黄': 'Yellow' }
+
+export function enA(val: string) { return ZH_TO_EN_ANIMALS[val] || val }
+export function enC(val: string) { return ZH_TO_EN_COLORS[val] || val }
+export function enT(val: string) { return val === '森林舞会' ? 'Forest Party' : val }
 
 export class GameEngine {
     public rooms: Map<string, RoomState> = new Map()
@@ -79,7 +82,7 @@ export class GameEngine {
                 const state: RoomState = {
                     roomId,
                     name: r.name,
-                    gameType: r.gameType || '森林舞会',
+                    gameType: r.gameType || 'Forest Party',
                     status,
                     timer,
                     roundNumber: 1,
@@ -99,10 +102,10 @@ export class GameEngine {
     private generateOdds() {
         const odds: Record<string, number> = {}
         const ranges: Record<string, [number, number]> = {
-            '狮子': [35, 46],
-            '熊猫': [15, 25],
-            '猴子': [8, 14],
-            '兔子': [4, 8]
+            'Lion': [35, 46],
+            'Panda': [15, 25],
+            'Monkey': [8, 14],
+            'Rabbit': [4, 8]
         }
         for (const a of ANIMALS) {
             for (const c of COLORS) {

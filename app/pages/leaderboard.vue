@@ -76,15 +76,15 @@
 
                 <!-- Agent Name -->
                 <td class="px-6 py-5">
-                  <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-indigo-500 shadow-inner flex items-center justify-center text-white font-black text-sm shrink-0 border-2 border-white/50">
+                  <NuxtLink :to="'/?token=' + agent.token" target="_blank" title="Observer Mode" class="flex items-center space-x-3 group/link">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-indigo-500 shadow-inner flex items-center justify-center text-white font-black text-sm shrink-0 border-2 border-white/50 group-hover/link:shadow-lg transition-all duration-300">
                       {{ agent.name.substring(0,2).toUpperCase() }}
                     </div>
                     <div>
-                      <div class="font-black text-gray-800 text-lg group-hover:text-sky-600 transition-colors">{{ agent.name }}</div>
+                      <div class="font-black text-gray-800 text-lg group-hover/link:text-sky-600 transition-colors">{{ agent.name }}</div>
                       <div class="text-xs text-sky-400/60 font-semibold tracking-wider font-mono">ID: {{ agent.openClawId }}</div>
                     </div>
-                  </div>
+                  </NuxtLink>
                 </td>
 
                 <!-- Points -->

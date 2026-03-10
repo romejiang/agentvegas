@@ -49,26 +49,26 @@
       <div class="flex flex-col space-y-2">
         <!-- Red Row -->
         <div class="grid grid-cols-4 gap-2">
-          <div v-for="animal in ['狮子', '熊猫', '猴子', '兔子']" :key="'红_'+animal"
+          <div v-for="animal in ['Lion', 'Panda', 'Monkey', 'Rabbit']" :key="'Red_'+animal"
                class="flex flex-col items-center justify-center transition-all duration-200 hover:scale-110">
-            <img :src="getAnimalIcon(animal, '红')" :alt="animal" class="w-10 h-10 object-contain drop-shadow-sm" />
-            <span class="text-[10px] font-extrabold mt-1 text-pink-600 bg-white/60 px-1 rounded-md w-full text-center">x{{ room?.oddsMap?.[`${animal}_红`] || '-' }}</span>
+            <img :src="getAnimalIcon(animal, 'Red')" :alt="animal" class="w-10 h-10 object-contain drop-shadow-sm" />
+            <span class="text-[10px] font-extrabold mt-1 text-pink-600 bg-white/60 px-1 rounded-md w-full text-center">x{{ room?.oddsMap?.[`${animal}_Red`] || '-' }}</span>
           </div>
         </div>
         <!-- Green Row -->
         <div class="grid grid-cols-4 gap-2">
-          <div v-for="animal in ['狮子', '熊猫', '猴子', '兔子']" :key="'绿_'+animal"
+          <div v-for="animal in ['Lion', 'Panda', 'Monkey', 'Rabbit']" :key="'Green_'+animal"
                class="flex flex-col items-center justify-center transition-all duration-200 hover:scale-110">
-            <img :src="getAnimalIcon(animal, '绿')" :alt="animal" class="w-10 h-10 object-contain drop-shadow-sm" />
-            <span class="text-[10px] font-extrabold mt-1 text-pink-600 bg-white/60 px-1 rounded-md w-full text-center">x{{ room?.oddsMap?.[`${animal}_绿`] || '-' }}</span>
+            <img :src="getAnimalIcon(animal, 'Green')" :alt="animal" class="w-10 h-10 object-contain drop-shadow-sm" />
+            <span class="text-[10px] font-extrabold mt-1 text-pink-600 bg-white/60 px-1 rounded-md w-full text-center">x{{ room?.oddsMap?.[`${animal}_Green`] || '-' }}</span>
           </div>
         </div>
         <!-- Yellow Row -->
         <div class="grid grid-cols-4 gap-2">
-          <div v-for="animal in ['狮子', '熊猫', '猴子', '兔子']" :key="'黄_'+animal"
+          <div v-for="animal in ['Lion', 'Panda', 'Monkey', 'Rabbit']" :key="'Yellow_'+animal"
                class="flex flex-col items-center justify-center transition-all duration-200 hover:scale-110">
-            <img :src="getAnimalIcon(animal, '黄')" :alt="animal" class="w-10 h-10 object-contain drop-shadow-sm" />
-            <span class="text-[10px] font-extrabold mt-1 text-pink-600 bg-white/60 px-1 rounded-md w-full text-center">x{{ room?.oddsMap?.[`${animal}_黄`] || '-' }}</span>
+            <img :src="getAnimalIcon(animal, 'Yellow')" :alt="animal" class="w-10 h-10 object-contain drop-shadow-sm" />
+            <span class="text-[10px] font-extrabold mt-1 text-pink-600 bg-white/60 px-1 rounded-md w-full text-center">x{{ room?.oddsMap?.[`${animal}_Yellow`] || '-' }}</span>
           </div>
         </div>
       </div>
@@ -84,8 +84,8 @@ const { observerToken, isObserverMode } = useAgentAuth()
 const { t } = useI18n()
 
 // Animal name to icon filename mapping
-const ANIMAL_NAME_MAP = { '狮子': 'lion', '熊猫': 'panda', '猴子': 'monkey', '兔子': 'rabbit' }
-const COLOR_NAME_MAP = { '红': 'red', '绿': 'green', '黄': 'yellow' }
+const ANIMAL_NAME_MAP = { 'Lion': 'lion', 'Panda': 'panda', 'Monkey': 'monkey', 'Rabbit': 'rabbit' }
+const COLOR_NAME_MAP = { 'Red': 'red', 'Green': 'green', 'Yellow': 'yellow' }
 
 function getAnimalIcon(animal, color) {
   const a = ANIMAL_NAME_MAP[animal]
@@ -111,9 +111,9 @@ const statusText = computed(() => {
 
 const winningColorClass = computed(() => {
   const colorMap = {
-    '红': 'text-red-500',
-    '绿': 'text-emerald-500',
-    '黄': 'text-amber-500'
+    'Red': 'text-red-500',
+    'Green': 'text-emerald-500',
+    'Yellow': 'text-amber-500'
   }
   return colorMap[props.room?.winningColor] || ''
 })

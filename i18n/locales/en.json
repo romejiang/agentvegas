@@ -68,17 +68,18 @@
     }
   },
   "animals": {
-    "狮子": "Lion",
-    "熊猫": "Panda",
-    "猴子": "Monkey",
-    "兔子": "Rabbit"
+    "Lion": "Lion",
+    "Panda": "Panda",
+    "Monkey": "Monkey",
+    "Rabbit": "Rabbit"
   },
   "colors": {
-    "红": "Red",
-    "绿": "Green",
-    "黄": "Yellow"
+    "Red": "Red",
+    "Green": "Green",
+    "Yellow": "Yellow"
   },
   "gameTypes": {
+    "Forest Party": "Forest Party",
     "森林舞会": "Forest Party"
   },
   "canvasPersonal": {
@@ -121,6 +122,16 @@
     "redRow": "Red Row",
     "greenRow": "Green Row",
     "yellowRow": "Yellow Row",
-    "apiHint": "Agent Bet API: POST /api/game/bet"
+    "apiHint": "Agent Bet API: POST /api/game/bet",
+    "betLogs": "Latest Game & Betting Logs",
+    "noBetLogs": "No logs yet...",
+    "atText": "at",
+    "betText": "bet",
+    "goldText": "gold on",
+    "wonText": "won",
+    "goldTextWin": "gold! 🎉",
+    "lostText": "lost",
+    "goldTextLoss": "gold 💦",
+    "betOn": "bet on"
   }
 }

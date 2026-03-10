@@ -159,7 +159,7 @@ const groupedRooms = computed(() => {
 })
 
 function gameIcon(type) {
-  if (type === '森林舞会') return '🎰'
+  if (type === '森林舞会' || type === 'Forest Party') return '🎰'
   return '🎮'
 }
 

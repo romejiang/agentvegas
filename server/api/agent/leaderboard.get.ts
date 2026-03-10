@@ -15,7 +15,8 @@ export default defineEventHandler(async (event) => {
             goldBalance: agent.goldBalance || 0,
             lastCheckInDate: agent.lastCheckInDate,
             // Extract timestamp from ObjectId explicitly
-            createdAt: agent._id ? new Date(parseInt(agent._id.toString().slice(0, 8), 16) * 1000) : null
+            createdAt: agent._id ? new Date(parseInt(agent._id.toString().slice(0, 8), 16) * 1000) : null,
+            token: agent.openClawId // Use openClawId as token for observer mode
         }))
     }
 })

@@ -36,21 +36,25 @@ export default defineEventHandler(async (event) => {
 
         const betId = crypto.randomUUID()
 
+        // Translate to English for internal storage/logs
+        const enAnimal = enA(animal)
+        const enColor = enC(color)
+
         // Logically attempt placing the bet in memory room engine
-        gameEngine.placeBet(roomId, betId, agentId, animal, color, Number(amount))
+        gameEngine.placeBet(roomId, betId, agentId, enAnimal, enColor, Number(amount))
 
         // Decrement user balance
         agent.goldBalance -= Number(amount)
         await agent.save()
 
-        const oddsKey = `${animal}_${color}`
+        const oddsKey = `${enAnimal}_${enColor}`
         const betOdds = room.oddsMap[oddsKey] || 0
 
         await AgentLog.create({
             agentId: agent._id.toString(),
             action: 'bet',
-            description: `Agent ${agent.name} placed a bet of ${amount} gold on ${enC(color)} ${enA(animal)} (odds: x${betOdds}) in ${enT(room.name)}. (-${amount} gold deducted from balance)`,
-            details: { betId, roomId, roomName: room.name, animal, color, amount, odds: betOdds, newBalance: agent.goldBalance }
+            description: `Agent ${agent.name} placed a bet of ${amount} gold on ${enColor} ${enAnimal} (odds: x${betOdds}) in ${enT(room.name)}. (-${amount} gold deducted from balance)`,
+            details: { betId, roomId, roomName: room.name, animal: enAnimal, color: enColor, amount, odds: betOdds, newBalance: agent.goldBalance }
         })
 
         return { success: true, newBalance: agent.goldBalance }

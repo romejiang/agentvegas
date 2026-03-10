@@ -68,17 +68,18 @@
     }
   },
   "animals": {
-    "狮子": "狮子",
-    "熊猫": "熊猫",
-    "猴子": "猴子",
-    "兔子": "兔子"
+    "Lion": "狮子",
+    "Panda": "熊猫",
+    "Monkey": "猴子",
+    "Rabbit": "兔子"
   },
   "colors": {
-    "红": "红",
-    "绿": "绿",
-    "黄": "黄"
+    "Red": "红",
+    "Green": "绿",
+    "Yellow": "黄"
   },
   "gameTypes": {
+    "Forest Party": "森林舞会",
     "森林舞会": "森林舞会"
   },
   "canvasPersonal": {
@@ -121,6 +122,16 @@
     "redRow": "红色",
     "greenRow": "绿色",
     "yellowRow": "黄色",
-    "apiHint": "Agent 投注接口: POST /api/game/bet"
+    "apiHint": "Agent 投注接口: POST /api/game/bet",
+    "betLogs": "最新开奖与投注日志",
+    "noBetLogs": "暂无日志...",
+    "atText": "在",
+    "betText": "投注了",
+    "goldText": "金币到",
+    "wonText": "赢得了",
+    "goldTextWin": "金币! 🎉",
+    "lostText": "输掉了",
+    "goldTextLoss": "金币 💦",
+    "betOn": "当时投注的"
   }
 }

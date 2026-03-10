@@ -16,7 +16,7 @@ export const GameRoom = defineMongooseModel({
         },
         gameType: {
             type: String,
-            default: '森林舞会',
+            default: 'Forest Party',
         },
     }
 })
