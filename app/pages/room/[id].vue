@@ -4,14 +4,14 @@
       <!-- Header -->
       <header class="mb-8 pb-4 flex items-center justify-between">
         <NuxtLink :to="isObserverMode ? `/?token=${observerToken}` : '/'" class="text-sm text-pink-500 hover:text-pink-600 flex items-center space-x-2 kawaii-card px-4 py-2 font-bold transition-all hover:scale-105">
-          <span>← 返回大厅</span>
+          <span>← {{ $t('roomDetail.back') }}</span>
         </NuxtLink>
         <div v-if="room" class="flex flex-col items-center">
           <h1 class="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-rose-400 to-fuchsia-500 tracking-wide">
             {{ room.name }}
           </h1>
           <div class="text-xs text-pink-400 tracking-wider mt-1 font-bold flex items-center space-x-2">
-            <span>状态:</span>
+            <span>{{ $t('roomDetail.statusLabel') }}</span>
             <span class="status-badge"
               :class="{
                 'status-betting': room.status === 'betting',
@@ -29,7 +29,7 @@
                  : 'bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.6)]'">
           </div>
           <span class="text-xs font-bold" :class="isConnected ? 'text-emerald-500' : 'text-red-400'">
-            {{ isConnected ? '在线' : '离线' }}
+            {{ isConnected ? $t('header.online') : $t('header.offline') }}
           </span>
         </div>        
       </header>
@@ -51,7 +51,7 @@
             }">
               {{ room.timer }}
             </span>
-            <span class="text-sm font-bold text-pink-300">秒</span>
+            <span class="text-sm font-bold text-pink-300">{{ $t('roomDetail.seconds') }}</span>
           </div>
 
           <!-- Target Display -->
@@ -76,17 +76,17 @@
             
             <!-- Center Result Text -->
             <div class="relative z-30 flex flex-col items-center justify-center text-center animate-bounce-in bg-white/30 backdrop-blur-sm rounded-full w-36 h-36 shadow-inner border border-white/40" v-if="room.status === 'finished' && room.winningAnimal">
-              <span class="text-xs text-pink-500 tracking-wider mb-1 font-extrabold">🏆 赢家</span>
+              <span class="text-xs text-pink-500 tracking-wider mb-1 font-extrabold">🏆 {{ $t('roomDetail.winner') }}</span>
               <span class="text-3xl md:text-3xl font-black drop-shadow-lg" :class="getTextColorClass(room.winningColor)">
-                {{ room.winningColor }}{{ room.winningAnimal }}
+                {{ $t(`colors.${room.winningColor}`) }}{{ $t(`animals.${room.winningAnimal}`) }}
               </span>
-              <span class="text-[10px] text-fuchsia-500 mt-2 tracking-wider font-bold sparkle">✨ 已记录</span>
+              <span class="text-[10px] text-fuchsia-500 mt-2 tracking-wider font-bold sparkle">✨ {{ $t('roomDetail.recorded') }}</span>
             </div>
             <div class="relative z-30 flex flex-col items-center justify-center bg-white/30 backdrop-blur-sm rounded-full w-24 h-24 border border-white/20" v-else-if="room.status === 'rolling'">
-              <span class="text-sm text-amber-600 font-extrabold tracking-wider animate-pulse">🎰 旋转中</span>
+              <span class="text-sm text-amber-600 font-extrabold tracking-wider animate-pulse">🎰 {{ $t('roomDetail.spinning') }}</span>
             </div>
             <div class="relative z-30 flex flex-col items-center justify-center" v-else>
-              <span class="text-sm text-emerald-600 tracking-wider font-extrabold bg-white/50 backdrop-blur-sm px-4 py-2 rounded-2xl shadow-sm">💰 等待投注</span>
+              <span class="text-sm text-emerald-600 tracking-wider font-extrabold bg-white/50 backdrop-blur-sm px-4 py-2 rounded-2xl shadow-sm">💰 {{ $t('roomDetail.waitingBet') }}</span>
             </div>
           </div>
         </div>
@@ -95,14 +95,14 @@
         <div class="kawaii-card p-5 md:p-6 w-full relative">
           <h2 class="text-xs text-pink-500 tracking-wider mb-5 font-extrabold pb-2 border-b border-pink-200/50 flex items-center space-x-2">
             <span>📊</span>
-            <span>投注矩阵 3×4</span>
+            <span>{{ $t('roomDetail.betMatrix') }}</span>
           </h2>
           
           <div class="flex flex-col space-y-4">
             
             <!-- Red Row -->
             <div>
-              <div class="text-[10px] font-bold text-red-400 mb-1.5 tracking-wider">🔴 红色</div>
+              <div class="text-[10px] font-bold text-red-400 mb-1.5 tracking-wider">🔴 {{ $t('roomDetail.redRow') }}</div>
               <div class="grid grid-cols-4 gap-2.5">
                 <div v-for="animal in ['狮子', '熊猫', '猴子', '兔子']" :key="'红_'+animal"
                      class="flex flex-col items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer"
@@ -117,7 +117,7 @@
             
             <!-- Green Row -->
             <div>
-              <div class="text-[10px] font-bold text-emerald-500 mb-1.5 tracking-wider">🟢 绿色</div>
+              <div class="text-[10px] font-bold text-emerald-500 mb-1.5 tracking-wider">🟢 {{ $t('roomDetail.greenRow') }}</div>
               <div class="grid grid-cols-4 gap-2.5">
                 <div v-for="animal in ['狮子', '熊猫', '猴子', '兔子']" :key="'绿_'+animal"
                      class="flex flex-col items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer"
@@ -132,7 +132,7 @@
             
             <!-- Yellow Row -->
             <div>
-              <div class="text-[10px] font-bold text-amber-500 mb-1.5 tracking-wider">🟡 黄色</div>
+              <div class="text-[10px] font-bold text-amber-500 mb-1.5 tracking-wider">🟡 {{ $t('roomDetail.yellowRow') }}</div>
               <div class="grid grid-cols-4 gap-2.5">
                 <div v-for="animal in ['狮子', '熊猫', '猴子', '兔子']" :key="'黄_'+animal"
                      class="flex flex-col items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer"
@@ -149,7 +149,7 @@
           
           <!-- Bottom Action -->
           <div class="mt-6 border-t border-pink-200/50 pt-4">
-             <div class="text-xs text-pink-400/60 font-semibold">💡 Agent 投注接口: POST /api/game/bet</div>
+             <div class="text-xs text-pink-400/60 font-semibold">💡 {{ $t('roomDetail.apiHint') }}</div>
           </div>
         </div>
       </main>
@@ -167,6 +167,7 @@ import { useRoute } from 'vue-router'
 import { useAgentAuth } from '~/composables/useAgentAuth'
 
 const { observerToken, isObserverMode } = useAgentAuth()
+const { t } = useI18n()
 
 const route = useRoute()
 const roomId = route.params.id
@@ -209,11 +210,11 @@ function seedRandom(seed) {
 
 const statusText = computed(() => {
   const map = {
-    'betting': '投注中',
-    'rolling': '开奖中',
-    'finished': '已结束'
+    'betting': t('roomCard.status.betting'),
+    'rolling': t('roomCard.status.rolling'),
+    'finished': t('roomCard.status.finished')
   }
-  return map[room.value?.status] || '未知'
+  return map[room.value?.status] || t('roomCard.status.unknown')
 })
 
 const slots = computed(() => {

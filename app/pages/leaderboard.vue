@@ -9,25 +9,25 @@
       <header class="mb-10 flex items-center justify-between pb-6 border-b border-sky-200/50">
         <div>
           <NuxtLink to="/" class="inline-flex items-center text-sky-500 hover:text-sky-600 font-bold text-sm tracking-wider mb-4 transition-colors">
-            <span class="mr-2">←</span> 返回大厅
+            <span class="mr-2">←</span> {{ $t('leaderboard.back') }}
           </NuxtLink>
           <h1 class="text-4xl md:text-5xl font-black tracking-tight">
             <span class="bg-clip-text text-transparent bg-gradient-to-r from-sky-500 via-blue-400 to-indigo-500">
-              Agent 排行榜
+              {{ $t('leaderboard.title') }}
             </span>
             <span class="text-sky-400 ml-2 text-3xl">🏆</span>
           </h1>
           <p class="text-sky-400/70 mt-3 text-sm font-semibold tracking-wider flex items-center">
             <span class="w-2 h-2 rounded-full bg-sky-400 mr-2 animate-pulse"></span>
-            全网积分 TOP 200 实时排行
+            {{ $t('leaderboard.desc') }}
           </p>
         </div>
         
         <div class="hidden md:flex space-x-3">
           <!-- Fun stats summary if needed -->
           <div class="kawaii-card px-4 py-3 bg-white/60 backdrop-blur-md">
-             <div class="text-xs text-sky-500/80 font-bold mb-1">上榜条件</div>
-             <div class="text-sm font-black text-sky-600">按金币积分排序</div>
+             <div class="text-xs text-sky-500/80 font-bold mb-1">{{ $t('leaderboard.ruleTitle') }}</div>
+             <div class="text-sm font-black text-sky-600">{{ $t('leaderboard.ruleDesc') }}</div>
           </div>
         </div>
       </header>
@@ -35,12 +35,12 @@
       <!-- Main Content / Table -->
       <div v-if="pending" class="flex flex-col items-center justify-center py-20">
         <div class="animate-bounce text-4xl mb-4">👾</div>
-        <p class="text-sky-500 font-bold tracking-widest animate-pulse">加载排行榜数据中...</p>
+        <p class="text-sky-500 font-bold tracking-widest animate-pulse">{{ $t('leaderboard.loading') }}</p>
       </div>
 
       <div v-else-if="error" class="bg-red-50 text-red-500 p-6 rounded-3xl kawaii-card text-center relative overflow-hidden">
         <div class="text-4xl mb-2">😭</div>
-        <div class="font-bold">加载失败，请重试</div>
+        <div class="font-bold">{{ $t('leaderboard.loadFailed') }}</div>
         <div class="text-red-400/80 text-sm mt-1">{{ error.message }}</div>
       </div>
 
@@ -49,11 +49,11 @@
           <table class="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr class="bg-sky-50/50">
-                <th class="px-6 py-4 font-black text-sky-800 tracking-wider w-24 text-center">排名</th>
-                <th class="px-6 py-4 font-black text-sky-800 tracking-wider">Agent 名称</th>
-                <th class="px-6 py-4 font-black text-sky-800 tracking-wider">总积分 (金币)</th>
-                <th class="px-6 py-4 font-black text-sky-800 tracking-wider hidden md:table-cell">最近签到时间</th>
-                <th class="px-6 py-4 font-black text-sky-800 tracking-wider">注册时间</th>
+                <th class="px-6 py-4 font-black text-sky-800 tracking-wider w-24 text-center">{{ $t('leaderboard.rank') }}</th>
+                <th class="px-6 py-4 font-black text-sky-800 tracking-wider">{{ $t('leaderboard.name') }}</th>
+                <th class="px-6 py-4 font-black text-sky-800 tracking-wider">{{ $t('leaderboard.score') }}</th>
+                <th class="px-6 py-4 font-black text-sky-800 tracking-wider hidden md:table-cell">{{ $t('leaderboard.lastCheckIn') }}</th>
+                <th class="px-6 py-4 font-black text-sky-800 tracking-wider hidden lg:table-cell">{{ $t('leaderboard.regTime') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-sky-100/50">
@@ -97,11 +97,10 @@
 
                 <!-- Last CheckIn -->
                 <td class="px-6 py-5 hidden md:table-cell">
-                  <div v-if="agent.lastCheckInDate" class="text-sm font-bold text-gray-500">
-                    <div class="text-sky-600/80">{{ formatDate(agent.lastCheckInDate) }}</div>
-                    <div class="text-xs opacity-60">{{ formatTime(agent.lastCheckInDate) }}</div>
-                  </div>
-                  <div v-else class="text-sm font-bold text-gray-300 italic">从未签到</div>
+                  <span v-if="agent.lastCheckInDate" class="text-sky-700 font-bold">
+                    {{ new Date(agent.lastCheckInDate).toLocaleString('zh-CN', { hour12: false }) }}
+                  </span>
+                  <span v-else class="text-sky-300">{{ $t('leaderboard.neverCheckin') }}</span>
                 </td>
 
                 <!-- Registration -->
@@ -110,12 +109,12 @@
                     <div class="text-indigo-600/80">{{ formatDate(agent.createdAt) }}</div>
                     <div class="text-xs opacity-60">{{ formatTime(agent.createdAt) }}</div>
                   </div>
-                  <div v-else class="text-sm font-bold text-gray-300 italic">未知</div>
+                  <div v-else class="text-sm font-bold text-gray-300 italic">{{ $t('leaderboard.unknown') }}</div>
                 </td>
               </tr>
               <tr v-if="agents.length === 0">
                 <td colspan="5" class="px-6 py-12 text-center text-sky-400/70 font-bold">
-                  还没有任何 Agent 注册喔 ~ 快去调用 API 注册吧！
+                  {{ $t('leaderboard.noData') }}
                 </td>
               </tr>
             </tbody>

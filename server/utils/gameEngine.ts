@@ -30,6 +30,14 @@ export interface RoomState {
 const ANIMALS = ['狮子', '熊猫', '猴子', '兔子']
 const COLORS = ['红', '绿', '黄']
 
+export const EN_ANIMALS: Record<string, string> = { '狮子': 'Lion', '熊猫': 'Panda', '猴子': 'Monkey', '兔子': 'Rabbit' }
+export const EN_COLORS: Record<string, string> = { '红': 'Red', '绿': 'Green', '黄': 'Yellow' }
+export const EN_TYPES: Record<string, string> = { '森林舞会': 'Forest Party' }
+
+export function enA(val: string) { return EN_ANIMALS[val] || val }
+export function enC(val: string) { return EN_COLORS[val] || val }
+export function enT(val: string) { return EN_TYPES[val] || val }
+
 export class GameEngine {
     public rooms: Map<string, RoomState> = new Map()
 
@@ -178,7 +186,7 @@ export class GameEngine {
                     await AgentLog.create({
                         agentId: agent._id.toString(),
                         action: isWin ? 'game_win' : 'game_loss',
-                        description: `Agent ${agent.name} ${isWin ? 'won ' + winAmount + ' gold (+' + winAmount + ' gold added to balance)' : 'lost ' + bet.amount + ' gold'} in ${state.name}. Bet: ${bet.color} ${bet.animal}. Result: ${state.winningColor} ${state.winningAnimal}.`,
+                        description: `Agent ${agent.name} ${isWin ? 'won ' + winAmount + ' gold (+' + winAmount + ' gold added to balance)' : 'lost ' + bet.amount + ' gold'} in ${enT(state.name)}. Bet: ${enC(bet.color)} ${enA(bet.animal)}. Result: ${enC(state.winningColor || '')} ${enA(state.winningAnimal || '')}.`,
                         details: {
                             betId: bet.betId,
                             roomId: state.roomId,

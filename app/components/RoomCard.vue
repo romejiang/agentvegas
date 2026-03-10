@@ -9,7 +9,7 @@
     <!-- Header Row: Room Name + Status Badge -->
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-lg font-extrabold text-pink-600 tracking-wide">
-        {{ room?.name || '房间' }}
+        {{ room?.name || $t('roomCard.room') }}
       </h2>
       <div class="status-badge"
         :class="{
@@ -27,24 +27,24 @@
         {{ room?.timer ?? '00' }}
         <span class="text-lg text-pink-300 ml-1 font-bold">s</span>
       </div>
-      <div class="text-xs text-pink-400/60 pb-2 font-semibold">倒计时</div>
+      <div class="text-xs text-pink-400/60 pb-2 font-semibold">{{ $t('roomCard.countdown') }}</div>
     </div>
     
     <!-- Result Area -->
     <div v-if="room?.status === 'finished' && room?.winningAnimal" 
          class="mb-5 p-4 rounded-2xl text-center animate-bounce-in relative z-10"
          style="background: linear-gradient(135deg, #FFF0F5, #FFE4ED);">
-      <div class="text-xs text-pink-400 mb-1 font-bold tracking-wider">🏆 开奖结果</div>
+      <div class="text-xs text-pink-400 mb-1 font-bold tracking-wider">🏆 {{ $t('roomCard.result') }}</div>
       <div class="text-xl font-black flex items-center justify-center space-x-2">
-        <span :class="winningColorClass">{{ room.winningColor }}</span>
-        <span class="text-pink-700">{{ room.winningAnimal }}</span>
+        <span :class="winningColorClass">{{ $t(`colors.${room.winningColor}`) }}</span>
+        <span class="text-pink-700">{{ $t(`animals.${room.winningAnimal}`) }}</span>
       </div>
     </div>
     
     <!-- Odds Map -->
     <div class="min-h-[140px]">
       <h3 class="text-xs font-bold text-pink-500 mb-3 mt-1 tracking-wider pb-1 flex justify-between items-center border-b border-pink-200/50">
-        <span>📊 赔率矩阵</span>
+        <span>📊 {{ $t('roomCard.oddsMap') }}</span>
       </h3>
       <div class="flex flex-col space-y-2">
         <!-- Red Row -->
@@ -81,6 +81,7 @@ import { computed } from 'vue'
 import { useAgentAuth } from '~/composables/useAgentAuth'
 
 const { observerToken, isObserverMode } = useAgentAuth()
+const { t } = useI18n()
 
 // Animal name to icon filename mapping
 const ANIMAL_NAME_MAP = { '狮子': 'lion', '熊猫': 'panda', '猴子': 'monkey', '兔子': 'rabbit' }
@@ -101,11 +102,11 @@ const props = defineProps({
 
 const statusText = computed(() => {
   const map = {
-    'betting': '投注中',
-    'rolling': '开奖中',
-    'finished': '已结束'
+    'betting': t('roomCard.status.betting'),
+    'rolling': t('roomCard.status.rolling'),
+    'finished': t('roomCard.status.finished')
   }
-  return map[props.room?.status] || '未知'
+  return map[props.room?.status] || t('roomCard.status.unknown')
 })
 
 const winningColorClass = computed(() => {

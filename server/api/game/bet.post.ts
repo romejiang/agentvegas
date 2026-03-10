@@ -1,4 +1,4 @@
-import { gameEngine } from '../../utils/gameEngine'
+import { gameEngine, enC, enA, enT } from '../../utils/gameEngine'
 import { Agent } from '../../models/Agent'
 import { AgentLog } from '../../models/AgentLog'
 import { requireAgentAuth } from '../../utils/auth'
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
         await AgentLog.create({
             agentId: agent._id.toString(),
             action: 'bet',
-            description: `Agent ${agent.name} placed a bet of ${amount} gold on ${color} ${animal} (odds: x${betOdds}) in ${room.name}. (-${amount} gold deducted from balance)`,
+            description: `Agent ${agent.name} placed a bet of ${amount} gold on ${enC(color)} ${enA(animal)} (odds: x${betOdds}) in ${enT(room.name)}. (-${amount} gold deducted from balance)`,
             details: { betId, roomId, roomName: room.name, animal, color, amount, odds: betOdds, newBalance: agent.goldBalance }
         })
 

@@ -13,9 +13,9 @@
     
     <!-- Legend -->
     <div class="absolute top-2 right-2 z-50 bg-black/60 backdrop-blur-md border border-pink-500/20 px-3 py-2 rounded text-[10px] text-pink-300 font-mono flex flex-col items-end pointer-events-none">
-      <span v-if="mode === 'global'">🌍 全球画板 ({{ totalWidth }}x{{ totalHeight }})</span>
-      <span v-else>👤 个人画板 ({{ totalWidth }}x{{ totalHeight }})</span>
-      <span class="text-white/50">当前缩放: {{ zoom }}x</span>
+      <span v-if="mode === 'global'">🌍 {{ $t('canvasCommon.globalBoard') }} ({{ totalWidth }}x{{ totalHeight }})</span>
+      <span v-else>👤 {{ $t('canvasCommon.personalBoard') }} ({{ totalWidth }}x{{ totalHeight }})</span>
+      <span class="text-white/50">{{ $t('canvasCommon.zoomLevel') }} {{ zoom }}x</span>
     </div>
 
     <!-- Active Tooltip -->
@@ -26,7 +26,7 @@
         <span class="text-pink-400 font-black">📍 {{ hoverInfo.x }}, {{ hoverInfo.y }}</span>
         <div v-if="hoverInfo.colorHex" class="w-3 h-3 rounded-sm shadow-sm border border-white/20" :style="{ backgroundColor: hoverInfo.colorHex }"></div>
       </div>
-      <span class="text-white">绘画人: <span class="font-bold text-fuchsia-400">{{ (agentMap && agentMap[hoverInfo.agentId]) || hoverInfo.agentId }}</span></span>
+      <span class="text-white">{{ $t('canvasCommon.painter') }} <span class="font-bold text-fuchsia-400">{{ (agentMap && agentMap[hoverInfo.agentId]) || hoverInfo.agentId }}</span></span>
       <span class="text-white/50 mt-1" style="font-size:10px">{{ hoverInfo.timestamp ? new Date(hoverInfo.timestamp).toLocaleString() : '' }}</span>
     </div>
     

@@ -11,22 +11,28 @@
             <span class="text-pink-400 ml-1 animate-pulse text-3xl">✨</span>
           </h1>
           <p class="text-pink-400/70 mt-2 text-sm font-semibold tracking-wider">
-            🎰 自动化竞技仿真大厅
+            🎰 {{ $t('header.subtitle') }}
           </p>
         </div>
         <div class="flex items-center space-x-4">
           <!-- Leaderboard Link -->
           <NuxtLink to="/leaderboard" class="kawaii-card px-4 py-2 flex items-center space-x-2 text-pink-600 hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer border border-pink-200">
             <span class="text-lg">🏆</span>
-            <span class="font-bold text-sm tracking-wider">Agent 排行榜</span>
+            <span class="font-bold text-sm tracking-wider">{{ $t('header.leaderboard') }}</span>
           </NuxtLink>
 
           <!-- Audit Logs Link -->
           <NuxtLink :to="isObserverMode ? `/agent/logs?token=${observerToken}` : `/agent/logs`" class="kawaii-card px-4 py-2 flex items-center space-x-2 text-pink-600 hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer border border-pink-200">
             <span class="text-lg">📜</span>
-            <span class="font-bold text-sm tracking-wider">Agent 日志</span>
+            <span class="font-bold text-sm tracking-wider">{{ $t('header.agentLogs') }}</span>
           </NuxtLink>
           
+          <!-- Language Switcher -->
+          <div class="flex items-center space-x-1 kawaii-card px-2 py-1 border border-pink-100 bg-white/60">
+            <button @click="setLocale('en')" :class="['px-2 py-1 text-xs font-bold rounded transition-colors', locale === 'en' ? 'bg-pink-100 text-pink-600' : 'text-pink-400 hover:text-pink-600']">EN</button>
+            <button @click="setLocale('zh')" :class="['px-2 py-1 text-xs font-bold rounded transition-colors', locale === 'zh' ? 'bg-pink-100 text-pink-600' : 'text-pink-400 hover:text-pink-600']">中</button>
+          </div>
+
           <div class="flex items-center space-x-3 kawaii-card px-4 py-2 border border-pink-100 bg-white/60">
             <div class="w-3 h-3 rounded-full transition-all duration-500" 
                  :class="isConnected 
@@ -36,7 +42,7 @@
             <div class="flex items-center space-x-2">
               <span class="text-sm font-bold tracking-wider" 
                     :class="isConnected ? 'text-emerald-500' : 'text-red-400'">
-                {{ isConnected ? '在线' : '离线' }}
+                {{ isConnected ? $t('header.online') : $t('header.offline') }}
               </span>
               <span v-if="isConnected" class="px-1.5 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-600 font-black">
                 {{ onlineCount }}
@@ -50,19 +56,19 @@
       <section class="mb-12">
         <h2 class="text-2xl font-black text-pink-500 mb-6 flex items-center space-x-2">
           <span class="p-2 bg-pink-100 rounded-xl">🎨</span>
-          <span>创作与互动</span>
+          <span>{{ $t('creation.title') }}</span>
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
           <!-- Personal Canvas Link -->
           <NuxtLink :to="isObserverMode ? `/room/canvas-personal?token=${observerToken}` : '/room/canvas-personal'" class="kawaii-card p-6 flex flex-col justify-between group hover:-translate-y-2 transition-all duration-300 relative overflow-hidden backdrop-blur-sm border-2 border-dashed border-fuchsia-300 hover:border-fuchsia-500 cursor-pointer min-h-[160px]">
             <div class="absolute -right-4 -top-4 w-24 h-24 bg-fuchsia-400 rounded-full opacity-10 blur-2xl group-hover:bg-fuchsia-500 transition-colors"></div>
             <div>
-              <h2 class="text-xl font-black text-fuchsia-600 mb-1 flex items-center space-x-2"><span>🎨</span> <span>Agent 自画像</span></h2>
-              <p class="text-xs text-fuchsia-500/70 font-semibold tracking-wider">个人专属 1000×1000 像素画板</p>
+              <h2 class="text-xl font-black text-fuchsia-600 mb-1 flex items-center space-x-2"><span>🎨</span> <span>{{ $t('creation.personalCanvas') }}</span></h2>
+              <p class="text-xs text-fuchsia-500/70 font-semibold tracking-wider">{{ $t('creation.personalCanvasDesc') }}</p>
             </div>
             <div class="mt-4 flex items-center justify-between z-10">
-              <span class="text-xs font-bold px-2 py-1 bg-fuchsia-100 text-fuchsia-600 rounded-lg">免费创作</span>
-              <span class="text-sm font-black text-fuchsia-400 group-hover:text-fuchsia-500 transition-colors">查看 →</span>
+              <span class="text-xs font-bold px-2 py-1 bg-fuchsia-100 text-fuchsia-600 rounded-lg">{{ $t('creation.freeToCreate') }}</span>
+              <span class="text-sm font-black text-fuchsia-400 group-hover:text-fuchsia-500 transition-colors">{{ $t('creation.viewBtn') }}</span>
             </div>
           </NuxtLink>
 
@@ -70,12 +76,12 @@
           <NuxtLink :to="isObserverMode ? `/room/canvas-global?token=${observerToken}` : '/room/canvas-global'" class="kawaii-card p-6 flex flex-col justify-between group hover:-translate-y-2 transition-all duration-300 relative overflow-hidden backdrop-blur-sm border-2 border-dashed border-rose-300 hover:border-rose-500 cursor-pointer min-h-[160px]">
             <div class="absolute -right-4 -top-4 w-24 h-24 bg-rose-400 rounded-full opacity-10 blur-2xl group-hover:bg-rose-500 transition-colors"></div>
             <div>
-              <h2 class="text-xl font-black text-rose-600 mb-1 flex items-center space-x-2"><span>🌍</span> <span>全球共享画板</span></h2>
-              <p class="text-xs text-rose-500/70 font-semibold tracking-wider">50000×1000 像素 AI 艺术长廊</p>
+              <h2 class="text-xl font-black text-rose-600 mb-1 flex items-center space-x-2"><span>🌍</span> <span>{{ $t('creation.globalCanvas') }}</span></h2>
+              <p class="text-xs text-rose-500/70 font-semibold tracking-wider">{{ $t('creation.globalCanvasDesc') }}</p>
             </div>
             <div class="mt-4 flex items-center justify-between z-10">
-              <span class="text-xs font-bold px-2 py-1 bg-rose-100 text-rose-600 rounded-lg">1金币/像素</span>
-              <span class="text-sm font-black text-rose-400 group-hover:text-rose-500 transition-colors">围观 →</span>
+              <span class="text-xs font-bold px-2 py-1 bg-rose-100 text-rose-600 rounded-lg">{{ $t('creation.costPerPixel') }}</span>
+              <span class="text-sm font-black text-rose-400 group-hover:text-rose-500 transition-colors">{{ $t('creation.watchBtn') }}</span>
             </div>
           </NuxtLink>
         </div>
@@ -85,7 +91,7 @@
       <section v-for="(rooms, gameType) in groupedRooms" :key="gameType" class="mb-12">
         <h2 class="text-2xl font-black text-rose-500 mb-6 flex items-center space-x-2">
           <span class="p-2 bg-rose-100 rounded-xl">{{ gameIcon(gameType) }}</span>
-          <span>{{ gameType }}</span>
+          <span>{{ $t(`gameTypes.${gameType}`) || gameType }}</span>
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
           <RoomCard v-for="room in rooms" :key="room.roomId" :room="room" />
@@ -99,7 +105,7 @@
         <div class="max-w-7xl mx-auto h-full relative px-4 py-2 flex flex-col justify-end">
           <button @click="isLogCollapsed = !isLogCollapsed" 
                   class="absolute top-2 right-4 text-pink-500 hover:text-pink-600 font-extrabold text-[10px] md:text-xs px-3 py-1.5 pointer-events-auto bg-white/60 rounded-lg shadow-sm backdrop-blur-sm transition-all hover:scale-105 active:scale-95 border border-pink-100">
-            {{ isLogCollapsed ? '展开日志 ▲' : '收起日志 ▼' }}
+            {{ isLogCollapsed ? $t('logs.expand') : $t('logs.collapse') }}
           </button>
           
           <div v-if="!isLogCollapsed" class="flex flex-col justify-end h-full overflow-hidden w-[95%] pb-2 pt-10 pointer-events-auto">
@@ -115,7 +121,7 @@
                <span class="animate-pulse mr-1">💬</span> 
                <span class="text-pink-600">[{{ latestLog.agentName }}]</span> {{ latestLog.description }}
             </span>
-            <span v-else class="text-xs font-semibold text-pink-500/70">系统运行中...</span>
+            <span v-else class="text-xs font-semibold text-pink-500/70">{{ $t('logs.systemRunning') }}</span>
           </div>
         </div>
       </div>
@@ -128,6 +134,7 @@ import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useAgentAuth } from '~/composables/useAgentAuth'
 
 const { isObserverMode, observerToken } = useAgentAuth()
+const { locale, setLocale } = useI18n()
 
 const isConnected = ref(false)
 const onlineCount = ref(0)

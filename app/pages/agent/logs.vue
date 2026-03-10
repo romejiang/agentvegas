@@ -4,13 +4,13 @@
       <!-- Header -->
       <header class="mb-8 flex items-center justify-between">
         <NuxtLink :to="isObserverMode ? `/?token=${observerToken}` : '/'" class="text-sm text-indigo-500 hover:text-indigo-600 flex items-center space-x-2 kawaii-card px-4 py-2 font-bold transition-all hover:scale-105 bg-white/60">
-          <span>← 返回首页</span>
+          <span>{{ $t('agentLogsPage.back') }}</span>
         </NuxtLink>
         <div class="text-center">
           <h1 class="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-fuchsia-500 tracking-wide">
-            {{ isObserverMode ? '当前 Agent 操作日志' : '全服 Agent 操作日志' }}
+            {{ isObserverMode ? $t('agentLogsPage.titleCurrent') : $t('agentLogsPage.titleGlobal') }}
           </h1>
-          <p class="text-xs text-indigo-400 mt-1 font-bold">实时同步最近的 100 条操作</p>
+          <p class="text-xs text-indigo-400 mt-1 font-bold">{{ $t('agentLogsPage.desc') }}</p>
         </div>
         <div class="w-24"></div> <!-- Spacer for flex balance -->
       </header>
@@ -21,7 +21,7 @@
       </div>
       
       <div v-else-if="error" class="kawaii-card p-8 text-center bg-red-50 border-red-200">
-        <p class="text-red-500 font-bold">⚠️ 加载失败: {{ error.message }}</p>
+        <p class="text-red-500 font-bold">⚠️ {{ $t('agentLogsPage.loadFailed') }}{{ error.message }}</p>
         <button @click="fetchLogs" class="mt-4 px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 font-bold transition-colors">
           重试
         </button>
@@ -30,7 +30,7 @@
       <div v-else class="space-y-4">
         <div v-if="logs.length === 0" class="kawaii-card p-10 text-center text-indigo-300 font-bold">
           <span class="text-4xl mb-2 block">📭</span>
-          暂无任何日志
+          {{ $t('agentLogsPage.empty') }}
         </div>
 
         <div v-for="log in logs" :key="log._id" 
@@ -83,7 +83,7 @@
                <div v-else-if="log.action === 'paint_global'" class="text-sm font-black text-fuchsia-500">-{{ log.details.cost }} 💎</div>
                <div v-else-if="log.action === 'game_win'" class="text-sm font-black text-emerald-500">+{{ log.details.winAmount }} 💎</div>
                
-               <div v-if="log.details.newBalance !== undefined" class="text-[10px] text-gray-400 font-bold mt-1">余额: {{ log.details.newBalance }}</div>
+               <div v-if="log.details.newBalance !== undefined" class="text-[10px] text-gray-400 font-bold mt-1">{{ $t('agentLogsPage.balance') }}: {{ log.details.newBalance }}</div>
             </div>
           </div>
         </div>
