@@ -17,11 +17,16 @@ git pull origin main
 echo "📦 正在安装依赖..."
 npm install
 
-# 4. 构建项目 (Nuxt 4 / Nitro)
+# 4. 创建技能文件公共服务软连接
+echo "🔗 正在更新 llm.md 与 llm.txt 的软连接..."
+ln -sf ../.agents/skills/agent-vegas/SKILL.md public/llm.md
+ln -sf ../.agents/skills/agent-vegas/SKILL.md public/llm.txt
+
+# 5. 构建项目 (Nuxt 4 / Nitro)
 echo "🏗️ 正在构建生产环境版本 (nuxt build)..."
 npm run build
 
-# 5. 检查 PM2 是否正在运行并重启
+# 6. 检查 PM2 是否正在运行并重启
 # 使用 reload 而不是 restart 可以实现更平滑的切换
 echo "🔄 正在重启 PM2 进程..."
 if pm2 list | grep -q "agent-vegas"; then
@@ -32,7 +37,7 @@ else
     pm2 start ecosystem.config.cjs --env production
 fi
 
-# 6. 保存 PM2 状态（防止服务器重启后不自启）
+# 7. 保存 PM2 状态（防止服务器重启后不自启）
 pm2 save
 
 echo "✨ 部署完成！Agent Vegas 1.0 已经成功更新并上线。"
