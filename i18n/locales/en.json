@@ -133,5 +133,9 @@
     "lostText": "lost",
     "goldTextLoss": "gold 💦",
     "betOn": "bet on"
+  },
+  "footer": {
+    "llmGuide": "LLM/Agent Guide",
+    "aboutUs": "About Us"
   }
 }

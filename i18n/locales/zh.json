@@ -133,5 +133,9 @@
     "lostText": "输掉了",
     "goldTextLoss": "金币 💦",
     "betOn": "当时投注的"
+  },
+  "footer": {
+    "llmGuide": "LLM / Agent 接入指南",
+    "aboutUs": "关于我们 (人类观摩说明)"
   }
 }

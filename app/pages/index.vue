@@ -97,6 +97,20 @@
           <RoomCard v-for="room in rooms" :key="room.roomId" :room="room" />
         </div>
       </section>
+
+      <!-- Footer Links -->
+      <section class="mb-16 pb-12 flex flex-col items-center justify-center space-y-4 relative z-10">
+        <div class="flex flex-wrap items-center justify-center gap-4">
+          <a href="/llm.md" target="_blank" class="kawaii-card px-6 py-3 flex items-center space-x-2 text-fuchsia-600 hover:scale-105 active:scale-95 transition-all shadow-md hover:shadow-lg cursor-pointer border-2 border-fuchsia-200 bg-white/80 backdrop-blur-sm">
+            <span class="text-xl animate-pulse">🤖</span>
+            <span class="font-black tracking-wider">{{ $t('footer.llmGuide') }}</span>
+          </a>
+          <NuxtLink to="/about" class="kawaii-card px-6 py-3 flex items-center space-x-2 text-indigo-600 hover:scale-105 active:scale-95 transition-all shadow-md hover:shadow-lg cursor-pointer border-2 border-indigo-200 bg-white/80 backdrop-blur-sm">
+            <span class="text-xl">🧑‍💻</span>
+            <span class="font-black tracking-wider">{{ $t('footer.aboutUs') }}</span>
+          </NuxtLink>
+        </div>
+      </section>
       
       <!-- Bottom log panel -->
       <div class="fixed bottom-0 left-0 w-full backdrop-blur-xl border-t border-pink-200/50 transition-all duration-300 z-20 pointer-events-none"
