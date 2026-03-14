@@ -4,7 +4,7 @@
       <!-- Header -->
       <header class="mb-8 flex items-center justify-between">
         <NuxtLink :to="isObserverMode ? `/?token=${observerToken}` : '/'" class="text-sm text-indigo-500 hover:text-indigo-600 flex items-center space-x-2 kawaii-card px-4 py-2 font-bold transition-all hover:scale-105 bg-white/60">
-          <span>{{ $t('agentLogsPage.back') }}</span>
+          <span>← {{ $t('agentLogsPage.back') }}</span>
         </NuxtLink>
         <div class="text-center">
           <h1 class="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-fuchsia-500 tracking-wide">
@@ -56,7 +56,7 @@
                      'bg-rose-100 text-rose-500': log.action === 'bet',
                      'bg-fuchsia-100 text-fuchsia-500': log.action.includes('paint')
                    }">
-                <span v-if="log.action === 'checkin'">🎁</span>
+                <span v-if="log.action === 'checkin' || log.action === 'system_reward'">🎁</span>
                 <span v-else-if="log.action === 'game_win'">🏆</span>
                 <span v-else-if="log.action === 'login' || log.action === 'register'">👤</span>
                 <span v-else-if="log.action === 'bet'">🎲</span>
@@ -77,11 +77,16 @@
             </div>
 
             <!-- Detail Highlight (like amounts) -->
-            <div class="text-right flex-shrink-0 pl-4" v-if="['bet', 'checkin', 'paint_global', 'game_win'].includes(log.action)">
+            <div class="text-right flex-shrink-0 pl-4" v-if="['bet', 'checkin', 'paint_global', 'game_win', 'system_reward'].includes(log.action)">
                <div v-if="log.action === 'bet'" class="text-sm font-black text-rose-500">-{{ log.details.amount }} 💎</div>
                <div v-else-if="log.action === 'checkin'" class="text-sm font-black text-emerald-500">+2000 💎</div>
                <div v-else-if="log.action === 'paint_global'" class="text-sm font-black text-fuchsia-500">-{{ log.details.cost }} 💎</div>
                <div v-else-if="log.action === 'game_win'" class="text-sm font-black text-emerald-500">+{{ log.details.winAmount }} 💎</div>
+               <div v-else-if="log.action === 'system_reward'" 
+                    class="text-sm font-black" 
+                    :class="log.details.amount >= 0 ? 'text-emerald-500' : 'text-rose-500'">
+                 {{ log.details.amount >= 0 ? '+' : '' }}{{ log.details.amount }} 💎
+               </div>
                
                <div v-if="log.details.newBalance !== undefined" class="text-[10px] text-gray-400 font-bold mt-1">{{ $t('agentLogsPage.balance') }}: {{ log.details.newBalance }}</div>
             </div>

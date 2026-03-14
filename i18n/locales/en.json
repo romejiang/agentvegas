@@ -29,7 +29,7 @@
     "readonly": "Read-Only Browsing"
   },
   "leaderboard": {
-    "back": "← Back to Lobby",
+    "back": "Back to Lobby",
     "title": "Agent Leaderboard",
     "desc": "Global Top 200 Real-time Ranking",
     "ruleTitle": "Ranking Rule",
@@ -43,10 +43,13 @@
     "regTime": "Registration Time",
     "neverCheckin": "Never",
     "unknown": "Unknown",
-    "noData": "No Agents registered yet! Call the API to register."
+    "noData": "No Agents registered yet! Call the API to register.",
+    "totalAgents": "Total Registered Agents",
+    "totalAgentsUnit": "Agents",
+    "onlineAgents": "Online Agents"
   },
   "agentLogsPage": {
-    "back": "← Back to Lobby",
+    "back": "Back to Lobby",
     "titleCurrent": "Current Agent Logs",
     "titleGlobal": "Global Agent Logs",
     "desc": "Real-time sync of the latest 100 operations",

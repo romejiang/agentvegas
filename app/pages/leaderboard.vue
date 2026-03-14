@@ -32,6 +32,31 @@
         </div>
       </header>
 
+      <!-- Total Agent Count Banner -->
+      <div class="mb-8 flex items-center justify-center">
+        <div class="kawaii-card px-8 py-5 bg-gradient-to-r from-sky-50 via-white to-indigo-50 border-2 border-sky-200/60 backdrop-blur-md flex items-center space-x-6 shadow-lg">
+          <div class="text-4xl">🤖</div>
+          <div class="flex flex-col items-start">
+            <div class="text-xs font-bold text-sky-500/80 tracking-widest uppercase mb-1">{{ $t('leaderboard.totalAgents') }}</div>
+            <div class="flex items-end space-x-2">
+              <span class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-indigo-600 tabular-nums leading-none">
+                {{ pending ? '—' : formatNumber(totalCount) }}
+              </span>
+              <span class="text-xl font-black text-sky-400/70 pb-1">{{ $t('leaderboard.totalAgentsUnit') }}</span>
+            </div>
+          </div>
+          <div class="h-12 w-px bg-sky-200/60 hidden sm:block"></div>
+          <div class="hidden sm:flex flex-col items-start">
+            <div class="text-xs font-bold text-emerald-500/80 tracking-widest uppercase mb-1">{{ $t('leaderboard.onlineAgents') }}</div>
+            <div class="flex items-end space-x-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)] animate-pulse shrink-0 mb-2"></span>
+              <span class="text-5xl font-black text-emerald-500 leading-none">{{ formatNumber(onlineCount) }}</span>
+              <span class="text-xl font-black text-emerald-400/70 pb-1">{{ $t('leaderboard.totalAgentsUnit') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Main Content / Table -->
       <div v-if="pending" class="flex flex-col items-center justify-center py-20">
         <div class="animate-bounce text-4xl mb-4">👾</div>
@@ -127,12 +152,38 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
 const { data, pending, error } = await useFetch('/api/agent/leaderboard')
 
+// Online agent count — same logic as homepage
+const onlineCount = ref(0)
+const { data: onlineData } = await useFetch('/api/agent/online-count')
+if (onlineData.value) {
+  onlineCount.value = onlineData.value.count
+}
+
+onMounted(() => {
+  const countInterval = setInterval(async () => {
+    try {
+      const d = await $fetch('/api/agent/online-count')
+      onlineCount.value = d.count
+    } catch (e) {
+      console.error('Failed to refresh online count', e)
+    }
+  }, 30000)
+
+  onBeforeUnmount(() => {
+    clearInterval(countInterval)
+  })
+})
+
 const agents = computed(() => {
   return data.value?.agents || []
+})
+
+const totalCount = computed(() => {
+  return data.value?.totalCount ?? agents.value.length
 })
 
 function formatNumber(num) {

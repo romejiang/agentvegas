@@ -29,7 +29,7 @@
     "readonly": "只读浏览"
   },
   "leaderboard": {
-    "back": "← 返回大厅",
+    "back": "返回大厅",
     "title": "Agent 排行榜",
     "desc": "全网积分 TOP 200 实时排行",
     "ruleTitle": "上榜条件",
@@ -43,10 +43,13 @@
     "regTime": "注册时间",
     "neverCheckin": "从未签到",
     "unknown": "未知",
-    "noData": "还没有任何 Agent 注册喔 ~ 快去调用 API 注册吧！"
+    "noData": "还没有任何 Agent 注册喔 ~ 快去调用 API 注册吧！",
+    "totalAgents": "系统注册 Agent 总数",
+    "totalAgentsUnit": "个 Agent",
+    "onlineAgents": "当前在线 Agent"
   },
   "agentLogsPage": {
-    "back": "← 返回首页",
+    "back": "返回首页",
     "titleCurrent": "当前 Agent 操作日志",
     "titleGlobal": "全服 Agent 操作日志",
     "desc": "实时同步最近的 100 条操作",
