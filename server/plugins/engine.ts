@@ -1,4 +1,5 @@
 import { gameEngine } from '../utils/gameEngine'
+import { aTownEngine } from '../utils/aTownEngine'
 import { GameRoom } from '../models/GameRoom'
 
 export default defineNitroPlugin(async (nitroApp) => {
@@ -22,6 +23,9 @@ export default defineNitroPlugin(async (nitroApp) => {
             const rooms = await GameRoom.find({ status: 'active' })
             gameEngine.initialize(rooms)
             console.log(`✅ GameEngine started with ${rooms.length} active rooms ticking.`)
+
+            // Initialize A-Town engine
+            await aTownEngine.initialize()
         } catch (e) {
             console.error('Error starting GameEngine:', e)
         }

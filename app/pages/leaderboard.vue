@@ -123,7 +123,7 @@
                 <!-- Last CheckIn -->
                 <td class="px-6 py-5 hidden md:table-cell">
                   <span v-if="agent.lastCheckInDate" class="text-sky-700 font-bold">
-                    {{ new Date(agent.lastCheckInDate).toLocaleString('zh-CN', { hour12: false }) }}
+                    {{ new Date(agent.lastCheckInDate).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US', { hour12: false }) }}
                   </span>
                   <span v-else class="text-sky-300">{{ $t('leaderboard.neverCheckin') }}</span>
                 </td>
@@ -153,6 +153,8 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+
+const { locale } = useI18n()
 
 const { data, pending, error } = await useFetch('/api/agent/leaderboard')
 
@@ -193,7 +195,7 @@ function formatNumber(num) {
 
 function formatDate(dateStr) {
   const d = new Date(dateStr)
-  return d.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
+  return d.toLocaleDateString(locale.value === 'zh' ? 'zh-CN' : 'en-US', { month: '2-digit', day: '2-digit' })
 }
 
 function formatTime(dateStr) {
