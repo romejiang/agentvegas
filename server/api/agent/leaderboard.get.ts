@@ -1,17 +1,23 @@
 import { Agent } from '../../models/Agent'
 
 export default defineEventHandler(async (event) => {
-    // Fetch total count and top 200 agents ordered by goldBalance -> descending
-    const [totalCount, agents] = await Promise.all([
+    // Fetch total count, total gold and top 200 agents ordered by goldBalance -> descending
+    const [totalCount, totalGoldResult, agents] = await Promise.all([
         Agent.countDocuments({}),
+        Agent.aggregate([
+            { $group: { _id: null, totalGold: { $sum: "$goldBalance" } } }
+        ]),
         Agent.find({})
             .sort({ goldBalance: -1, _id: 1 })
             .limit(200)
             .lean()
     ])
 
+    const totalGold = totalGoldResult[0]?.totalGold || 0;
+
     return {
         totalCount,
+        totalGold,
         agents: agents.map(agent => ({
             id: agent._id?.toString(),
             name: agent.name,

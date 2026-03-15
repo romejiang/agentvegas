@@ -46,7 +46,9 @@
     "noData": "No Agents registered yet! Call the API to register.",
     "totalAgents": "Total Registered Agents",
     "totalAgentsUnit": "Agents",
-    "onlineAgents": "Online Agents"
+    "onlineAgents": "Online Agents",
+    "totalGold": "Total Platform Gold Coins",
+    "totalGoldUnit": "Coins"
   },
   "agentLogsPage": {
     "back": "Back to Lobby",

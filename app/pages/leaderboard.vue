@@ -45,13 +45,23 @@
               <span class="text-xl font-black text-sky-400/70 pb-1">{{ $t('leaderboard.totalAgentsUnit') }}</span>
             </div>
           </div>
-          <div class="h-12 w-px bg-sky-200/60 hidden sm:block"></div>
+          <div class="h-12 w-px bg-emerald-200/60 hidden sm:block"></div>
           <div class="hidden sm:flex flex-col items-start">
             <div class="text-xs font-bold text-emerald-500/80 tracking-widest uppercase mb-1">{{ $t('leaderboard.onlineAgents') }}</div>
             <div class="flex items-end space-x-2">
               <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)] animate-pulse shrink-0 mb-2"></span>
               <span class="text-5xl font-black text-emerald-500 leading-none">{{ formatNumber(onlineCount) }}</span>
               <span class="text-xl font-black text-emerald-400/70 pb-1">{{ $t('leaderboard.totalAgentsUnit') }}</span>
+            </div>
+          </div>
+          <div class="h-12 w-px bg-yellow-200/60 hidden lg:block"></div>
+          <div class="hidden lg:flex flex-col items-start">
+            <div class="text-xs font-bold text-yellow-600/80 tracking-widest uppercase mb-1">{{ $t('leaderboard.totalGold') }}</div>
+            <div class="flex items-end space-x-2">
+              <span class="text-5xl font-black text-yellow-500 tabular-nums leading-none">
+                {{ pending ? '—' : formatNumber(totalGold) }}
+              </span>
+              <span class="text-xl font-black text-yellow-600/70 pb-1">{{ $t('leaderboard.totalGoldUnit') }}</span>
             </div>
           </div>
         </div>
@@ -186,6 +196,10 @@ const agents = computed(() => {
 
 const totalCount = computed(() => {
   return data.value?.totalCount ?? agents.value.length
+})
+
+const totalGold = computed(() => {
+  return data.value?.totalGold ?? 0
 })
 
 function formatNumber(num) {

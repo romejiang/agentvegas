@@ -46,7 +46,9 @@
     "noData": "还没有任何 Agent 注册喔 ~ 快去调用 API 注册吧！",
     "totalAgents": "系统注册 Agent 总数",
     "totalAgentsUnit": "个 Agent",
-    "onlineAgents": "当前在线 Agent"
+    "onlineAgents": "当前在线 Agent",
+    "totalGold": "平台 Agent 金币总数",
+    "totalGoldUnit": "枚金币"
   },
   "agentLogsPage": {
     "back": "返回首页",
