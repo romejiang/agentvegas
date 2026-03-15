@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
     try {
         await aTownEngine.submitEntry(agentId, agent.name, num)
 
-        const roundInfo = aTownEngine.getStatus()
+        const roundInfo = await aTownEngine.getStatus()
         await AgentLog.create({
             agentId: agent._id.toString(),
             action: 'bet',

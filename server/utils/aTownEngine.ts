@@ -56,7 +56,7 @@ class ATownEngine {
                     // If it was calculating, just resolve it now to be safe
                     await this.resolveRound()
                 } else if (this.state.entries.length >= QUEUE_SIZE) {
-                    await this.startCalculating()
+                    await this.startCalculating(this.state.roundNumber)
                 }
             } else {
                 // Start fresh new round
@@ -93,7 +93,25 @@ class ATownEngine {
     /**
      * Get current round info (for status API).
      */
-    public getStatus() {
+    public async getStatus() {
+        // Always refresh from DB to support multi-process environments
+        try {
+            const latest = await ATownRound.findOne().sort({ roundNumber: -1 }) as any
+            if (latest) {
+                this.state.roundNumber = latest.roundNumber
+                this.state.status = latest.status as any
+                this.state.startTime = latest.startTime
+                this.state.entries = latest.entries.map((e: any) => ({
+                    agentId: e.agentId.toString(),
+                    agentName: e.agentName,
+                    number: e.number,
+                    betTime: e.betTime
+                }))
+            }
+        } catch (err) {
+            console.error('ATownEngine getStatus sync error:', err)
+        }
+
         const entries = this.state.entries
         const sum = entries.reduce((acc, e) => acc + e.number, 0)
         const avg = entries.length > 0 ? Math.round((sum / entries.length) * 10) / 10 : 0
@@ -116,6 +134,23 @@ class ATownEngine {
      * Submit a bet. Persists immediately to DB.
      */
     public async submitEntry(agentId: string, agentName: string, number: number): Promise<void> {
+        // Refresh from DB first to get latest entries count
+        try {
+            const latest = await ATownRound.findOne().sort({ roundNumber: -1 }) as any
+            if (latest) {
+                this.state.roundNumber = latest.roundNumber
+                this.state.status = latest.status as any
+                this.state.entries = latest.entries.map((e: any) => ({
+                    agentId: e.agentId.toString(),
+                    agentName: e.agentName,
+                    number: e.number,
+                    betTime: e.betTime
+                }))
+            }
+        } catch (err) {
+            console.error('ATownEngine submitEntry sync error:', err)
+        }
+
         if (this.state.status !== 'waiting') {
             throw new Error('Round is not accepting bets right now (calculating in progress)')
         }
@@ -131,32 +166,49 @@ class ATownEngine {
         const entry: ATownEntry = { agentId, agentName, number, betTime: new Date() }
         
         // PERSIST IMMEDIATELY TO DB
-        await ATownRound.findOneAndUpdate(
+        const updatedRound = await ATownRound.findOneAndUpdate(
             { roundNumber: this.state.roundNumber, status: 'waiting' },
-            { $push: { entries: entry } }
-        )
+            { $push: { entries: entry } },
+            { new: true }
+        ) as any
 
-        this.state.entries.push(entry)
-        console.log(`📝 Bet persisted for ${agentName} in Round #${this.state.roundNumber}`)
+        if (!updatedRound) {
+            throw new Error('Round not found or status changed. Please refresh and try again.')
+        }
+
+        // Update local state from the actual DB result to ensure consistency
+        this.state.entries = updatedRound.entries.map((e: any) => ({
+            agentId: e.agentId.toString(),
+            agentName: e.agentName,
+            number: e.number,
+            betTime: e.betTime
+        }))
+
+        console.log(`📝 Bet persisted for ${agentName} in Round #${this.state.roundNumber}. Total entries: ${this.state.entries.length}`)
 
         if (this.state.entries.length >= QUEUE_SIZE) {
-            await this.startCalculating()
+            await this.startCalculating(this.state.roundNumber)
         }
     }
 
     /**
      * Transition to calculating state.
      */
-    private async startCalculating() {
-        this.state.status = 'calculating'
-        
-        // Update status in DB
-        await ATownRound.findOneAndUpdate(
-            { roundNumber: this.state.roundNumber },
-            { status: 'calculating' }
+    private async startCalculating(roundNumber: number) {
+        // Use an atomic update to ensure only one process transitions it to 'calculating'
+        const updated = await ATownRound.findOneAndUpdate(
+            { roundNumber, status: 'waiting' },
+            { status: 'calculating' },
+            { new: true }
         )
 
-        console.log(`🎲 ATown Round #${this.state.roundNumber}: Calculating...`)
+        if (!updated) {
+            console.log(`⚠️ ATown Round #${roundNumber}: Calculating state skip (already triggered by another process)`)
+            return
+        }
+
+        this.state.status = 'calculating'
+        console.log(`🎲 ATown Round #${roundNumber}: Calculating...`)
 
         this.state.calculatingTimer = setTimeout(async () => {
             await this.resolveRound()

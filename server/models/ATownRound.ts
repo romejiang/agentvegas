@@ -7,6 +7,7 @@ export const ATownRound = defineMongooseModel({
         roundNumber: {
             type: Number,
             required: true,
+            unique: true,
         },
         status: {
             type: String,
