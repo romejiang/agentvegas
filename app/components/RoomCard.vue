@@ -73,19 +73,42 @@
         </div>
       </div>
     </div>
+
+    <!-- History Area -->
+    <div class="mt-6 pt-4 border-t border-pink-100/50">
+      <h3 class="text-[10px] font-black text-pink-400 mb-3 tracking-widest flex justify-between items-center uppercase">
+        <span>📜 {{ $t('roomCard.gameHistory') }}</span>
+      </h3>
+      <div v-if="history.length > 0" class="flex flex-wrap gap-2">
+         <div v-for="item in history" :key="item._id" 
+              class="w-7 h-7 rounded-full flex items-center justify-center p-0.5 border shadow-sm transition-transform hover:scale-125 hover:z-10"
+              :class="getHistoryBgClass(item.winningColor)"
+              :title="`${$t('animals.'+item.winningAnimal)} ${$t('colors.'+item.winningColor)}`"
+         >
+           <img :src="getAnimalIcon(item.winningAnimal, item.winningColor)" :alt="item.winningAnimal" class="w-full h-full object-contain filter drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]" />
+         </div>
+      </div>
+      <div v-else class="text-[10px] text-pink-300 italic font-medium">{{ $t('roomCard.noHistory') }}</div>
+    </div>
   </NuxtLink>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import { useAgentAuth } from '~/composables/useAgentAuth'
 
 const { observerToken, isObserverMode } = useAgentAuth()
 const { t } = useI18n()
 
 // Animal name to icon filename mapping
-const ANIMAL_NAME_MAP = { 'Lion': 'lion', 'Panda': 'panda', 'Monkey': 'monkey', 'Rabbit': 'rabbit' }
-const COLOR_NAME_MAP = { 'Red': 'red', 'Green': 'green', 'Yellow': 'yellow' }
+const ANIMAL_NAME_MAP = { 
+  'Lion': 'lion', 'Panda': 'panda', 'Monkey': 'monkey', 'Rabbit': 'rabbit',
+  '狮子': 'lion', '熊猫': 'panda', '猴子': 'monkey', '兔子': 'rabbit'
+}
+const COLOR_NAME_MAP = { 
+  'Red': 'red', 'Green': 'green', 'Yellow': 'yellow',
+  '红': 'red', '绿': 'green', '黄': 'yellow'
+}
 
 function getAnimalIcon(animal, color) {
   const a = ANIMAL_NAME_MAP[animal]
@@ -117,6 +140,40 @@ const winningColorClass = computed(() => {
   }
   return colorMap[props.room?.winningColor] || ''
 })
+
+const history = ref([])
+async function fetchHistory() {
+  if (!props.room?.roomId) return
+  try {
+    const data = await $fetch(`/api/rooms/${props.room.roomId}/history`)
+    history.value = data.records || []
+  } catch (e) {
+    console.error('Failed to fetch history', e)
+  }
+}
+
+watch(() => props.room?.status, (newStatus) => {
+  if (newStatus === 'finished') {
+    // Wait a bit for the DB to be updated
+    setTimeout(fetchHistory, 1000)
+  }
+})
+
+onMounted(() => {
+  fetchHistory()
+})
+
+const getHistoryBgClass = (color) => {
+  const map = {
+    'Red': 'bg-red-50/80 border-red-100',
+    '红': 'bg-red-50/80 border-red-100',
+    'Green': 'bg-emerald-50/80 border-emerald-100',
+    '绿': 'bg-emerald-50/80 border-emerald-100',
+    'Yellow': 'bg-amber-50/80 border-amber-100',
+    '黄': 'bg-amber-50/80 border-amber-100'
+  }
+  return map[color] || 'bg-gray-50 border-gray-100'
+}
 </script>
 
 <style scoped>

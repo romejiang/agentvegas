@@ -155,6 +155,34 @@
         </div>
         </main>
         
+        <!-- Game History (Roadmap) -->
+        <section class="mt-8 kawaii-card p-6 overflow-hidden relative">
+          <div class="absolute -right-4 -top-4 w-24 h-24 bg-pink-300/10 blur-2xl rounded-full"></div>
+          <h2 class="text-lg text-pink-500 font-extrabold mb-5 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span>📜</span>
+              <span>{{ $t('roomCard.gameHistory') }}</span>
+            </div>
+            <span class="text-[10px] text-pink-300 font-bold tracking-widest uppercase">{{ $t('roomDetail.winner') }} HISTORY</span>
+          </h2>
+          <div v-if="history.length > 0" class="flex flex-wrap gap-4">
+             <div v-for="item in history" :key="item._id" class="flex flex-col items-center group">
+               <div class="w-12 h-12 rounded-full flex items-center justify-center p-1.5 border-2 shadow-sm transition-all group-hover:scale-110 group-hover:shadow-md cursor-help overflow-hidden mb-1.5"
+                    :class="getHistoryBgClass(item.winningColor)"
+                    :title="`${$t('animals.'+item.winningAnimal)} ${$t('colors.'+item.winningColor)}`"
+               >
+                 <img :src="getAnimalIcon(item.winningAnimal, item.winningColor)" :alt="item.winningAnimal" class="w-full h-full object-contain filter drop-shadow-md" />
+               </div>
+               <span class="text-[10px] font-black text-pink-600 bg-white/80 px-2 py-0.5 rounded-full border border-pink-100 shadow-sm transition-all group-hover:bg-pink-50">
+                 x{{ item.oddsMap?.[`${item.winningAnimal}_${item.winningColor}`] || '--' }}
+               </span>
+             </div>
+          </div>
+          <div v-else class="text-center text-slate-400 py-12 text-sm font-bold border-2 border-dashed border-slate-100 rounded-3xl">
+            {{ $t('roomCard.noHistory') }}
+          </div>
+        </section>
+
         <!-- Betting Logs -->
         <section class="mt-8 kawaii-card p-6">
           <h2 class="text-lg text-pink-500 font-extrabold mb-4 flex items-center space-x-2">
@@ -221,7 +249,31 @@ const activeIndex = ref(-1)
 const spinDirection = ref(1)
 
 const betLogs = ref([])
+const history = ref([])
 let logsInterval = null
+
+async function fetchHistory() {
+  try {
+    const res = await $fetch(`/api/rooms/${roomId}/history`)
+    if (res && res.records) {
+      history.value = res.records
+    }
+  } catch (e) {
+    console.error('Error fetching history', e)
+  }
+}
+
+const getHistoryBgClass = (color) => {
+  const map = {
+    'Red': 'bg-red-50/80 border-red-100',
+    '红': 'bg-red-50/80 border-red-100',
+    'Green': 'bg-emerald-50/80 border-emerald-100',
+    '绿': 'bg-emerald-50/80 border-emerald-100',
+    'Yellow': 'bg-amber-50/80 border-amber-100',
+    '黄': 'bg-amber-50/80 border-amber-100'
+  }
+  return map[color] || 'bg-gray-50 border-gray-100'
+}
 
 async function fetchLogs() {
   if (!roomId) return
@@ -240,8 +292,14 @@ const COLORS = ['Red', 'Green', 'Yellow']
 const ANIMALS = ['Lion', 'Panda', 'Monkey', 'Rabbit']
 
 // Animal name to icon filename mapping
-const ANIMAL_NAME_MAP = { 'Lion': 'lion', 'Panda': 'panda', 'Monkey': 'monkey', 'Rabbit': 'rabbit' }
-const COLOR_NAME_MAP = { 'Red': 'red', 'Green': 'green', 'Yellow': 'yellow' }
+const ANIMAL_NAME_MAP = { 
+  'Lion': 'lion', 'Panda': 'panda', 'Monkey': 'monkey', 'Rabbit': 'rabbit',
+  '狮子': 'lion', '熊猫': 'panda', '猴子': 'monkey', '兔子': 'rabbit'
+}
+const COLOR_NAME_MAP = { 
+  'Red': 'red', 'Green': 'green', 'Yellow': 'yellow',
+  '红': 'red', '绿': 'green', '黄': 'yellow'
+}
 
 function getAnimalIcon(animal, color) {
   const a = ANIMAL_NAME_MAP[animal]
@@ -324,6 +382,7 @@ let spinInterval = null
 
 onMounted(() => {
   fetchLogs()
+  fetchHistory()
   logsInterval = setInterval(fetchLogs, 5000)
 
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
@@ -355,6 +414,8 @@ watch(() => room.value?.status, (newStatus) => {
     }
     spinInterval = setInterval(startSpin, speed)
   } else if (newStatus === 'finished') {
+    setTimeout(fetchHistory, 1200) // Refresh history when round finishes
+    fetchLogs()
     if (spinInterval) {
       clearInterval(spinInterval)
       spinInterval = null

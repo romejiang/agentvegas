@@ -68,7 +68,9 @@
       "rolling": "开奖中",
       "finished": "已结束",
       "unknown": "未知"
-    }
+    },
+    "gameHistory": "开奖记录 (路单)",
+    "noHistory": "暂无开奖记录"
   },
   "animals": {
     "Lion": "狮子",

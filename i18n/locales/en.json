@@ -68,7 +68,9 @@
       "rolling": "Rolling",
       "finished": "Finished",
       "unknown": "Unknown"
-    }
+    },
+    "gameHistory": "Game History (Roadmap)",
+    "noHistory": "No game history"
   },
   "animals": {
     "Lion": "Lion",
