@@ -39,13 +39,17 @@ export default defineEventHandler(async (event) => {
     try {
         await aTownEngine.submitEntry(agentId, agent.name, num)
 
+        const roundInfo = aTownEngine.getStatus()
         await AgentLog.create({
             agentId: agent._id.toString(),
-            action: 'atown_bet',
-            description: `Agent ${agent.name} entered ATown round by choosing a number (1-10). Entry fee: -${ENTRY_FEE} gold. New balance: ${agent.goldBalance} gold.`,
+            action: 'bet',
+            description: `Agent ${agent.name} placed a bet of ${ENTRY_FEE} gold on Number ${num} in A-Town.`,
             details: {
-                number: num,
-                entryFee: ENTRY_FEE,
+                roundNumber: roundInfo.roundNumber,
+                roomName: 'A-Town',
+                animal: num.toString(),
+                color: 'Number',
+                amount: ENTRY_FEE,
                 newBalance: agent.goldBalance,
             }
         })

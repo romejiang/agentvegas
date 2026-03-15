@@ -32,24 +32,66 @@ class ATownEngine {
     }
 
     /**
-     * Initialize from DB on server start — find the latest round number
+     * Initialize from DB on server start — resume or create new waiting round
      */
     public async initialize() {
         try {
-            const latest = await ATownRound.findOne().sort({ roundNumber: -1 }).lean() as any
-            this.state.roundNumber = latest ? (latest.roundNumber as number) + 1 : 1
-            this.state.status = 'waiting'
-            this.state.startTime = new Date()
-            this.state.entries = []
-            console.log(`✅ ATownEngine initialized. Starting at round #${this.state.roundNumber}`)
+            const latest = await ATownRound.findOne().sort({ roundNumber: -1 }) as any
+            
+            if (latest && latest.status !== 'resolved') {
+                // Resume existing round
+                this.state.roundNumber = latest.roundNumber
+                this.state.status = latest.status as any
+                this.state.startTime = latest.startTime
+                this.state.entries = latest.entries.map((e: any) => ({
+                    agentId: e.agentId.toString(),
+                    agentName: e.agentName,
+                    number: e.number,
+                    betTime: e.betTime
+                }))
+                
+                console.log(`✅ ATownEngine resumed round #${this.state.roundNumber} with ${this.state.entries.length} entries.`)
+                
+                if (this.state.status === 'calculating') {
+                    // If it was calculating, just resolve it now to be safe
+                    await this.resolveRound()
+                } else if (this.state.entries.length >= QUEUE_SIZE) {
+                    await this.startCalculating()
+                }
+            } else {
+                // Start fresh new round
+                const nextRoundNum = latest ? (latest.roundNumber as number) + 1 : 1
+                await this.createNewRound(nextRoundNum)
+            }
         } catch (e) {
             console.error('ATownEngine init error:', e)
         }
     }
 
     /**
+     * Create a new round record in DB and set as current state
+     */
+    private async createNewRound(roundNumber: number) {
+        const startTime = new Date()
+        const newRound = await ATownRound.create({
+            roundNumber,
+            status: 'waiting',
+            startTime,
+            entries: []
+        })
+
+        this.state = {
+            roundNumber,
+            status: 'waiting',
+            startTime,
+            entries: [],
+            calculatingTimer: null,
+        }
+        console.log(`✅ ATown Round #${roundNumber} created in DB and waiting for entries...`)
+    }
+
+    /**
      * Get current round info (for status API).
-     * Numbers are hidden — only sum and average exposed.
      */
     public getStatus() {
         const entries = this.state.entries
@@ -63,7 +105,6 @@ class ATownEngine {
             total: QUEUE_SIZE,
             sumOfNumbers: sum,
             avgNumber: avg,
-            // Only expose agent name and bet time, NOT the number
             entries: entries.map(e => ({
                 agentName: e.agentName,
                 betTime: e.betTime,
@@ -72,7 +113,7 @@ class ATownEngine {
     }
 
     /**
-     * Submit a bet. Returns error string or null on success.
+     * Submit a bet. Persists immediately to DB.
      */
     public async submitEntry(agentId: string, agentName: string, number: number): Promise<void> {
         if (this.state.status !== 'waiting') {
@@ -88,7 +129,15 @@ class ATownEngine {
         }
 
         const entry: ATownEntry = { agentId, agentName, number, betTime: new Date() }
+        
+        // PERSIST IMMEDIATELY TO DB
+        await ATownRound.findOneAndUpdate(
+            { roundNumber: this.state.roundNumber, status: 'waiting' },
+            { $push: { entries: entry } }
+        )
+
         this.state.entries.push(entry)
+        console.log(`📝 Bet persisted for ${agentName} in Round #${this.state.roundNumber}`)
 
         if (this.state.entries.length >= QUEUE_SIZE) {
             await this.startCalculating()
@@ -96,50 +145,45 @@ class ATownEngine {
     }
 
     /**
-     * Transition to calculating state, then resolve after 10 seconds.
+     * Transition to calculating state.
      */
     private async startCalculating() {
         this.state.status = 'calculating'
+        
+        // Update status in DB
+        await ATownRound.findOneAndUpdate(
+            { roundNumber: this.state.roundNumber },
+            { status: 'calculating' }
+        )
+
         console.log(`🎲 ATown Round #${this.state.roundNumber}: Calculating...`)
 
-        // Resolve after CALCULATING_DURATION_MS
         this.state.calculatingTimer = setTimeout(async () => {
             await this.resolveRound()
         }, CALCULATING_DURATION_MS)
     }
 
     /**
-     * Double Minority Algorithm:
-     * 1. Count frequency of each number
-     * 2. Find the minimum frequency
-     * 3. Among all numbers with min frequency, pick the smallest value
-     * Returns { winningNumber, frequency map, reason string }
+     * Double Minority Algorithm (Unchanged)
      */
-    public computeWinner(entries: ATownEntry[]): {
-        winningNumber: number,
-        numberFrequency: Record<string, number>,
-        winReason: string,
-        winnerEntries: ATownEntry[]
-    } {
-        // Build frequency map
+    public computeWinner(entries: ATownEntry[]) {
         const freq: Record<number, number> = {}
         for (let i = 1; i <= 10; i++) freq[i] = 0
         for (const e of entries) {
             freq[e.number] = (freq[e.number] || 0) + 1
         }
 
-        // Only consider numbers that were actually chosen
         const chosenNumbers = Object.entries(freq)
             .filter(([, count]) => count > 0)
             .map(([num, count]) => ({ num: parseInt(num), count }))
 
-        // Find minimum frequency among chosen numbers
+        if (chosenNumbers.length === 0) {
+            // Should not happen if QUEUE_SIZE > 0
+            return { winningNumber: 0, numberFrequency: freq, winReason: "No entries", winnerEntries: [] }
+        }
+
         const minFreq = Math.min(...chosenNumbers.map(x => x.count))
-
-        // Find candidates (numbers with minimum frequency)
         const candidates = chosenNumbers.filter(x => x.count === minFreq).sort((a, b) => a.num - b.num)
-
-        // Pick smallest number value among candidates
         const winner = candidates[0]!
 
         const numberFrequency: Record<string, number> = {}
@@ -156,12 +200,11 @@ class ATownEngine {
         }
 
         const winnerEntries = entries.filter(e => e.number === winner.num)
-
         return { winningNumber: winner.num, numberFrequency, winReason, winnerEntries }
     }
 
     /**
-     * Run settlement and persist results to DB.
+     * Run settlement and persist final results to current DB record.
      */
     private async resolveRound() {
         const round = this.state
@@ -174,12 +217,11 @@ class ATownEngine {
 
         console.log(`🏆 ATown Round #${round.roundNumber}: Winner number=${winningNumber}, ${winners.length} winner(s), prize=${prizePerWinner} each`)
 
-        // Process payouts
+        // Process payouts and logs
         for (const entry of entries) {
             const isWinner = winners.includes(entry.agentId)
             try {
                 if (isWinner) {
-                    // Refund entry fee + prize share
                     const netGain = prizePerWinner - ENTRY_FEE
                     const agent = await Agent.findByIdAndUpdate(
                         entry.agentId,
@@ -190,16 +232,16 @@ class ATownEngine {
                     if (agent) {
                         await AgentLog.create({
                             agentId: entry.agentId,
-                            action: 'atown_win',
-                            description: `Agent ${entry.agentName} WON ATown Round #${round.roundNumber}! Chose number ${entry.number}. ${winReason} Prize: +${prizePerWinner} gold (net gain: ${netGain >= 0 ? '+' : ''}${netGain} after ${ENTRY_FEE} entry fee).`,
+                            action: 'game_win',
+                            description: `Agent ${entry.agentName} won ${prizePerWinner} gold (+${prizePerWinner} gold added to balance) in A-Town Round ${round.roundNumber}. Result: Number ${winningNumber}.`,
                             details: {
                                 roundNumber: round.roundNumber,
-                                chosenNumber: entry.number,
-                                winningNumber,
-                                winReason,
-                                prizePerWinner,
-                                entryFee: ENTRY_FEE,
+                                roomName: 'A-Town',
+                                winningAnimal: winningNumber.toString(),
+                                betAnimal: entry.number.toString(),
+                                winAmount: prizePerWinner,
                                 newBalance: agent.goldBalance,
+                                winReason: winReason
                             }
                         })
                     }
@@ -209,7 +251,7 @@ class ATownEngine {
                         await AgentLog.create({
                             agentId: entry.agentId,
                             action: 'atown_loss',
-                            description: `Agent ${entry.agentName} lost ATown Round #${round.roundNumber}. Chose number ${entry.number}, winning number was ${winningNumber}. Lost ${ENTRY_FEE} gold entry fee.`,
+                            description: `Agent ${entry.agentName} lost ATown Round #${round.roundNumber}. Chose number ${entry.number}, winning number was ${winningNumber}.`,
                             details: {
                                 roundNumber: round.roundNumber,
                                 chosenNumber: entry.number,
@@ -226,39 +268,28 @@ class ATownEngine {
             }
         }
 
-        // Persist to DB
+        // Update existing DB record with results
         try {
-            await ATownRound.create({
-                roundNumber: round.roundNumber,
-                status: 'resolved',
-                startTime: round.startTime,
-                endTime: new Date(),
-                entries: entries.map(e => ({
-                    agentId: e.agentId,
-                    agentName: e.agentName,
-                    number: e.number,
-                    betTime: e.betTime,
-                })),
-                winningNumber,
-                winReason,
-                winners,
-                prizePerWinner,
-                numberFrequency,
-            })
+            await ATownRound.findOneAndUpdate(
+                { roundNumber: round.roundNumber },
+                {
+                    status: 'resolved',
+                    endTime: new Date(),
+                    winningNumber,
+                    winReason,
+                    winners,
+                    prizePerWinner,
+                    numberFrequency,
+                }
+            )
         } catch (err) {
             console.error('ATown DB save error:', err)
         }
 
-        // Start next round
-        this.state = {
-            roundNumber: round.roundNumber + 1,
-            status: 'waiting',
-            startTime: new Date(),
-            entries: [],
-            calculatingTimer: null,
-        }
-        console.log(`✅ ATown Round #${round.roundNumber + 1} started. Waiting for entries...`)
+        // Start next round immediately in DB
+        await this.createNewRound(round.roundNumber + 1)
     }
 }
 
 export const aTownEngine = new ATownEngine()
+

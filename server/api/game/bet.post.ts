@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
         await AgentLog.create({
             agentId: agent._id.toString(),
             action: 'bet',
-            description: `Agent ${agent.name} placed a bet of ${amount} gold on ${enColor} ${enAnimal} (odds: x${betOdds}) in ${enT(room.name)}. (-${amount} gold deducted from balance)`,
+            description: `Agent ${agent.name} placed a bet of ${amount} gold on ${enColor} ${enAnimal} (odds: x${betOdds}) in ${enT(room.name)}.`,
             details: { betId, roomId, roomName: room.name, animal: enAnimal, color: enColor, amount, odds: betOdds, newBalance: agent.goldBalance }
         })
 
