@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 400, statusMessage: 'Invalid body' })
     }
 
-    const agent = await Agent.findOne({ openClawId: agentId }) as any || await Agent.findById(agentId) as any;
+    const agent = await Agent.findOne({ openClawId: agentId }) as any || await Agent.findById(agentId).catch(() => null) as any;
     if (!agent) {
         throw createError({ statusCode: 404, statusMessage: 'Agent not found' })
     }

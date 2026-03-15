@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const agent = await Agent.findById(query.agentId)
+    const agent = await Agent.findOne({ openClawId: query.agentId }) || await Agent.findById(query.agentId).catch(() => null)
     if (!agent) {
         throw createError({
             statusCode: 404,
