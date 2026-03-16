@@ -33,21 +33,23 @@ async function getAgentMap() {
 
 export default defineEventHandler(async (event) => {
     const query = getQuery(event)
-    const startChunk = parseInt(query.startChunk as string) || 0
-    const endChunk = parseInt(query.endChunk as string) || 99
+    const startChunk = query.startChunk !== undefined ? parseInt(query.startChunk as string) : 0
+    const endChunk = query.endChunk !== undefined ? parseInt(query.endChunk as string) : 99
 
     try {
         const rawPixels = await canvasEngine.getGlobalCanvasChunks(startChunk, endChunk)
         const agentMap = await getAgentMap();
 
-        // Convert Map data to a more compact flat array: [x, y, color, agentIndex, timestamp]
-        // Small performance helper: map agent IDs to short indices for this response
         const agentsInResponse: string[] = [];
         const agentIdToIndex: Record<string, number> = {};
         
-        const pixels: any[] = [];
+        const pixels: string[] = [];
+        const baseTime = Math.floor(Date.now() / 1000);
+
         for (const [key, val] of Object.entries(rawPixels) as any) {
             const coords = key.replace('pixels.', '').split(',').map(Number);
+            const x = coords[0];
+            const y = coords[1];
             
             let aIdx = agentIdToIndex[val.agentId];
             if (aIdx === undefined) {
@@ -56,20 +58,28 @@ export default defineEventHandler(async (event) => {
                 agentIdToIndex[val.agentId] = aIdx;
             }
 
-            pixels.push([
-                coords[0], 
-                coords[1], 
-                val.color, 
-                aIdx, 
-                val.timestamp ? Math.floor(new Date(val.timestamp).getTime() / 1000) : 0
-            ]);
+            const relTs = val.timestamp ? Math.floor(new Date(val.timestamp).getTime() / 1000) - baseTime : 0;
+            
+            // Format: "x,y,color,agentIdx,relTs" as a single string per pixel, or even combined
+            // To be extremely aggressive, use a custom string format
+            pixels.push(`${x},${y},${val.color},${aIdx},${relTs}`);
+        }
+
+        // Only send the names of agents that are actually in this pixel set
+        const filteredAgentMap: Record<string, string> = {};
+        for (const id of agentsInResponse) {
+            if (agentMap[id]) {
+                filteredAgentMap[id] = agentMap[id];
+            }
         }
 
         return { 
             success: true, 
-            pixels, 
-            agentMap,
-            agentIndexMap: agentsInResponse // Array of agentIds, index in pixels corresponds to this array
+            pixels: pixels.join('|'), 
+            pixelCount: pixels.length,
+            baseTime,
+            agentMap: filteredAgentMap,
+            agentIndexMap: agentsInResponse 
         }
     } catch (e: any) {
         throw createError({ statusCode: 500, statusMessage: e.message })

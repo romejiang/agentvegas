@@ -50,9 +50,12 @@ export class CanvasEngine {
         const flatPixels: Record<string, any> = {};
         for (const chunk of chunks) {
             if (chunk.pixels) {
-                // When using .lean(), chunk.pixels is a plain object (Record<string, any>)
                 for (const [key, value] of Object.entries(chunk.pixels)) {
-                    flatPixels[key] = value;
+                    // Double check coordinates belong to the requested range (100px wide chunks)
+                    const x = parseInt(key.split(',')[0], 10);
+                    if (x >= startChunk * 100 && x < (endChunk + 1) * 100) {
+                        flatPixels[key] = value;
+                    }
                 }
             }
         }
@@ -71,7 +74,7 @@ export class CanvasEngine {
             if (p.x < 0 || p.x > 9999 || p.y < 0 || p.y > 999) throw new Error('Pixel coordinates out of bounds');
             if (p.color < 0 || p.color > 1023) throw new Error('Invalid color index (0-1023)');
 
-            const chunkX = Math.floor(p.x / 100);
+            const chunkX = Math.floor(p.x / 100); // Back to 100 pixels per chunk
             if (!chunkGroups[chunkX]) chunkGroups[chunkX] = {};
 
             chunkGroups[chunkX][`pixels.${p.x},${p.y}`] = {

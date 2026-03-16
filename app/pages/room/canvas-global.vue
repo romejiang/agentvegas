@@ -88,58 +88,84 @@ const loadProgress = ref(0) // 0 to 100
 let ws = null
 
 const loadCanvasInSteps = async () => {
-    // Smaller batch size to keep JS execution time low
-    const BATCH_SIZE = 5; 
     const TOTAL_CHUNKS = 100;
     
-    try {
-        loadingStatus.value = 'Connecting to pixels...'
-        // Initial load of the first minimal batch
-        const res = await $fetch(`/api/canvas/global?startChunk=0&endChunk=${BATCH_SIZE - 1}`)
-        if (res.success && res.pixels) {
-            // Unpack compact format: [x, y, color, agentIndex, timestamp]
-            const initialPixels = {}
-            for (const p of res.pixels) {
-                const [x, y, color, aIdx, ts] = p;
-                initialPixels[`${x},${y}`] = { 
-                    color, 
-                    agentId: res.agentIndexMap[aIdx], 
-                    timestamp: ts * 1000 
-                }
-            }
-            pixelsData.value = initialPixels
-            if (res.agentMap) agentMapData.value = res.agentMap
-        }
-        isInitialLoading.value = false
-        loadProgress.value = (BATCH_SIZE / TOTAL_CHUNKS) * 100
-        
-        // Load the rest in background with slight delays to keep UI reactive
-        for (let i = BATCH_SIZE; i < TOTAL_CHUNKS; i += BATCH_SIZE) {
-            const end = Math.min(i + BATCH_SIZE - 1, TOTAL_CHUNKS - 1);
-            loadingStatus.value = `Syncing area ${i * 100}-${(end + 1) * 100}...`
+    // Helper to fetch and render a range of chunks
+    const syncBatch = async (start, end) => {
+        loadingStatus.value = `Syncing area ${start * 100}-${(end + 1) * 100}...`
+        const batchRes = await $fetch(`/api/canvas/global?startChunk=${start}&endChunk=${end}`)
+        if (batchRes.success && batchRes.pixels) {
+            const updates = []
+            const baseTime = (batchRes.baseTime || 0) * 1000
             
-            // Artificial delay to let the browser process other tasks (animations, interactions)
-            await new Promise(r => setTimeout(r, 50)); 
-
-            const batchRes = await $fetch(`/api/canvas/global?startChunk=${i}&endChunk=${end}`)
-            if (batchRes.success && batchRes.pixels) {
-                const updates = []
-                for (const p of batchRes.pixels) {
-                    const [x, y, color, aIdx, ts] = p;
-                    const agentId = batchRes.agentIndexMap[aIdx];
-                    const timestamp = ts * 1000;
+            // Handle new pipe-delimited string format: "x,y,color,agentIdx,relTs|x,y,..."
+            if (typeof batchRes.pixels === 'string' && batchRes.pixels) {
+                const pixelStrings = batchRes.pixels.split('|')
+                for (const ps of pixelStrings) {
+                    const [xStr, yStr, cStr, aIdxStr, relTsStr] = ps.split(',')
+                    const x = parseInt(xStr, 10)
+                    const y = parseInt(yStr, 10)
+                    const color = parseInt(cStr, 10)
+                    const aIdx = parseInt(aIdxStr, 10)
+                    const relTs = parseInt(relTsStr, 10)
                     
-                    // Update main data object for tooltips
+                    const agentId = batchRes.agentIndexMap[aIdx]
+                    const timestamp = baseTime + (relTs * 1000)
+                    
+                    // Update local tooltips data
                     pixelsData.value[`${x},${y}`] = { color, agentId, timestamp }
                     updates.push({ x, y, color, agentId, timestamp })
                 }
-                
-                if (renderer.value && updates.length > 0) {
-                    renderer.value.paintDelta(updates)
+            } else if (Array.isArray(batchRes.pixels)) {
+                // Fallback for array format if needed or during migration
+                for (let i = 0; i < batchRes.pixels.length; i += 5) {
+                    const x = batchRes.pixels[i]
+                    const y = batchRes.pixels[i+1]
+                    const color = batchRes.pixels[i+2]
+                    const aIdx = batchRes.pixels[i+3]
+                    const relTs = batchRes.pixels[i+4]
+                    
+                    const agentId = batchRes.agentIndexMap[aIdx]
+                    const timestamp = baseTime + (relTs * 1000)
+                    
+                    pixelsData.value[`${x},${y}`] = { color, agentId, timestamp }
+                    updates.push({ x, y, color, agentId, timestamp })
                 }
             }
-            loadProgress.value = ((end + 1) / TOTAL_CHUNKS) * 100
+            
+            if (renderer.value && updates.length > 0) {
+                renderer.value.paintDelta(updates)
+            }
+            if (batchRes.agentMap) {
+                Object.assign(agentMapData.value, batchRes.agentMap)
+            }
         }
+        loadProgress.value = ((end + 1) / TOTAL_CHUNKS) * 100
+    }
+
+    try {
+        loadingStatus.value = 'Connecting to pixels...'
+        
+        // 1. Chunks 0 to 19: Load 2 by 2 for steady initial build-up
+        for (let i = 0; i < 20; i += 2) {
+            await syncBatch(i, i + 1);
+            
+            // Hide initial loading screen after the very first batch
+            if (i === 0) isInitialLoading.value = false;
+            
+            // Short pause to keep UI reactive
+            await new Promise(r => setTimeout(r, 30)); 
+        }
+
+        // 2. Chunks 20 to 99: Load 5 by 5 for faster background completion
+        for (let i = 20; i < TOTAL_CHUNKS; i += 5) {
+            const end = Math.min(i + 4, TOTAL_CHUNKS - 1);
+            await syncBatch(i, end);
+            
+            // Slightly longer pause for larger batches
+            await new Promise(r => setTimeout(r, 60)); 
+        }
+
         loadingStatus.value = 'Canvas Synced'
     } catch (e) {
         console.error('Failed to load global canvas', e)
