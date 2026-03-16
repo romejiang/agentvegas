@@ -44,14 +44,14 @@ export class CanvasEngine {
     async getGlobalCanvasChunks(startChunk: number, endChunk: number) {
         const chunks = await GlobalCanvas.find({
             chunkX: { $gte: startChunk, $lte: endChunk }
-        });
+        }).lean() as any[];
 
         // Combine all chunks into one flat map of "x,y" => {color, agentId, timestamp}
         const flatPixels: Record<string, any> = {};
         for (const chunk of chunks) {
             if (chunk.pixels) {
-                const chunkData = Object.fromEntries(chunk.pixels as any);
-                for (const [key, value] of Object.entries(chunkData)) {
+                // When using .lean(), chunk.pixels is a plain object (Record<string, any>)
+                for (const [key, value] of Object.entries(chunk.pixels)) {
                     flatPixels[key] = value;
                 }
             }

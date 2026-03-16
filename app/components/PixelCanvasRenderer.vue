@@ -185,13 +185,14 @@ watch(() => props.pixels, () => {
 }, { deep: false }) 
 
 // Expose public method for parent to paint incrementally without full redraw
-function paintDelta(updates) { // updates: [{x, y, color}]
+function paintDelta(updates) { // updates: [{x, y, color, agentId, timestamp}]
   for (const idx in canvasRefs.value) {
       if (!ctxCache[idx]) {
           ctxCache[idx] = canvasRefs.value[idx].getContext('2d', { alpha: false })
       }
   }
 
+  const now = Date.now()
   for (const p of updates) {
     if (p.x < 0 || p.x >= props.totalWidth || p.y < 0 || p.y >= props.totalHeight) continue
     const chunkIdx = Math.floor(p.x / CHUNK_WIDTH)
@@ -202,7 +203,11 @@ function paintDelta(updates) { // updates: [{x, y, color}]
       // Local mutation update tracking so tooltips work seamlessly
       const key = `${p.x},${p.y}`
       if (props.mode === 'global') {
-          props.pixels[key] = { color: p.color, agentId: p.agentId, timestamp: Date.now() }
+          props.pixels[key] = { 
+            color: p.color, 
+            agentId: p.agentId, 
+            timestamp: p.timestamp || now 
+          }
       } else {
           props.pixels[key] = p.color
       }

@@ -111,7 +111,8 @@
     "connected": "Live Sync On",
     "disconnected": "Connection Lost",
     "cost": "Cost: 1 Coin / Pixel",
-    "initializing": "Initializing global chunk data network..."
+    "initializing": "Initializing global chunk data network...",
+    "loadingBackground": "Syncing background chunks..."
   },
   "canvasCommon": {
     "globalBoard": "Global Canvas",

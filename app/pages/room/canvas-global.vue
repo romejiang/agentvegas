@@ -41,11 +41,27 @@
             <PixelCanvasRenderer ref="renderer" mode="global" :pixels="pixelsData" :agentMap="agentMapData" :totalWidth="10000" :totalHeight="1000" />
         </div>
         
-        <div v-else class="flex flex-col justify-center items-center h-64 text-pink-400/50 font-bold text-lg animate-pulse w-full kawaii-card">
-            <span class="text-4xl mb-4">🌍</span>
+        <div v-else class="flex flex-col justify-center items-center h-64 text-pink-500 font-bold text-lg w-full kawaii-card">
+            <span class="text-4xl mb-4 animate-bounce">🌍</span>
             {{ $t('canvasGlobal.initializing') }}
-            <div class="w-48 h-2 bg-pink-100 rounded-full mt-4 overflow-hidden">
-                <div class="bg-rose-400 h-full w-1/2 animate-[ping_1.5s_infinite]"></div>
+            <div class="w-64 h-3 bg-pink-100/50 rounded-full mt-6 overflow-hidden border border-pink-200 shadow-inner">
+                <div class="bg-gradient-to-r from-rose-400 to-pink-500 h-full transition-all duration-500" :style="{ width: loadProgress + '%' }"></div>
+            </div>
+            <div class="mt-3 text-[10px] font-mono opacity-60 uppercase tracking-widest">{{ loadingStatus }} ({{ Math.round(loadProgress) }}%)</div>
+        </div>
+
+        <!-- Background Loading Indicator -->
+        <div v-if="!isInitialLoading && loadProgress < 100" class="fixed bottom-24 right-6 z-[100] kawaii-card px-4 py-2 bg-white/90 backdrop-blur-md border-pink-200 border shadow-xl flex items-center space-x-3 animate-fade-in">
+            <div class="relative w-8 h-8 flex items-center justify-center">
+                <svg class="animate-spin h-6 w-6 text-pink-500" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="absolute text-[8px] font-bold text-pink-600">{{ Math.round(loadProgress) }}%</span>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-[10px] font-bold text-pink-500 leading-tight">{{ $t('canvasGlobal.loadingBackground') || 'Background Loading...' }}</span>
+                <span class="text-[8px] text-pink-400/70 font-mono">{{ loadingStatus }}</span>
             </div>
         </div>
       </main>
@@ -65,21 +81,77 @@ const pixelsData = ref({})
 const agentMapData = ref({})
 const renderer = ref(null)
 
+const isBackgroundLoading = ref(false)
+const loadingStatus = ref('')
+const loadProgress = ref(0) // 0 to 100
+
 let ws = null
 
-onMounted(async () => {
-    // 1. Fetch initial chunk data (fetching chunks 0-99 which is the whole 10kx1k canvas).
+const loadCanvasInSteps = async () => {
+    // Smaller batch size to keep JS execution time low
+    const BATCH_SIZE = 5; 
+    const TOTAL_CHUNKS = 100;
+    
     try {
-        const res = await $fetch('/api/canvas/global?startChunk=0&endChunk=99')
+        loadingStatus.value = 'Connecting to pixels...'
+        // Initial load of the first minimal batch
+        const res = await $fetch(`/api/canvas/global?startChunk=0&endChunk=${BATCH_SIZE - 1}`)
         if (res.success && res.pixels) {
-            pixelsData.value = res.pixels
+            // Unpack compact format: [x, y, color, agentIndex, timestamp]
+            const initialPixels = {}
+            for (const p of res.pixels) {
+                const [x, y, color, aIdx, ts] = p;
+                initialPixels[`${x},${y}`] = { 
+                    color, 
+                    agentId: res.agentIndexMap[aIdx], 
+                    timestamp: ts * 1000 
+                }
+            }
+            pixelsData.value = initialPixels
             if (res.agentMap) agentMapData.value = res.agentMap
         }
+        isInitialLoading.value = false
+        loadProgress.value = (BATCH_SIZE / TOTAL_CHUNKS) * 100
+        
+        // Load the rest in background with slight delays to keep UI reactive
+        for (let i = BATCH_SIZE; i < TOTAL_CHUNKS; i += BATCH_SIZE) {
+            const end = Math.min(i + BATCH_SIZE - 1, TOTAL_CHUNKS - 1);
+            loadingStatus.value = `Syncing area ${i * 100}-${(end + 1) * 100}...`
+            
+            // Artificial delay to let the browser process other tasks (animations, interactions)
+            await new Promise(r => setTimeout(r, 50)); 
+
+            const batchRes = await $fetch(`/api/canvas/global?startChunk=${i}&endChunk=${end}`)
+            if (batchRes.success && batchRes.pixels) {
+                const updates = []
+                for (const p of batchRes.pixels) {
+                    const [x, y, color, aIdx, ts] = p;
+                    const agentId = batchRes.agentIndexMap[aIdx];
+                    const timestamp = ts * 1000;
+                    
+                    // Update main data object for tooltips
+                    pixelsData.value[`${x},${y}`] = { color, agentId, timestamp }
+                    updates.push({ x, y, color, agentId, timestamp })
+                }
+                
+                if (renderer.value && updates.length > 0) {
+                    renderer.value.paintDelta(updates)
+                }
+            }
+            loadProgress.value = ((end + 1) / TOTAL_CHUNKS) * 100
+        }
+        loadingStatus.value = 'Canvas Synced'
     } catch (e) {
         console.error('Failed to load global canvas', e)
+        loadingStatus.value = 'Sync Interrupted'
     } finally {
         isInitialLoading.value = false
     }
+}
+
+onMounted(async () => {
+    // 1. Fetch initial chunk data in steps
+    loadCanvasInSteps()
 
     // 2. Setup WebSocket for live updates
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
@@ -100,7 +172,8 @@ onMounted(async () => {
                 // Note: we add agentId to each pixel to inject global mode tracking 
                 const decoratedPixels = parsedMsg.pixels.map(p => ({
                     ...p, 
-                    agentId: parsedMsg.agentId
+                    agentId: parsedMsg.agentId,
+                    timestamp: Date.now() // Incoming WS updates use current time
                 }))
                 
                 if (renderer.value) {
@@ -108,7 +181,7 @@ onMounted(async () => {
                 }
             }
         } catch (e) {
-          console.error('Canvas WS Parse Error', e)
+            console.error('Canvas WS Parse Error', e)
         }
     }
     
