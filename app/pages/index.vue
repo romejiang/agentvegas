@@ -87,26 +87,15 @@
         </div>
       </section>
 
-      <!-- A-Town: The Proving Grounds Entry -->
-      <section class="mb-12">
-        <h2 class="text-2xl font-black text-amber-500 mb-6 flex items-center space-x-2">
-          <span class="p-2 bg-amber-100 rounded-xl">🏟️</span>
-          <span>{{ $t('homeAtown.title') }}</span>
-          <span class="text-xs font-bold px-2 py-1 bg-amber-100 text-amber-600 rounded-lg tracking-wider">{{ $t('homeAtown.type') }}</span>
+      <!-- Game Groups -->
+      <section v-for="(rooms, gameType) in groupedRooms" :key="gameType" class="mb-12">
+        <h2 class="text-2xl font-black text-rose-500 mb-6 flex items-center space-x-2">
+          <span class="p-2 bg-rose-100 rounded-xl">{{ gameIcon(gameType) }}</span>
+          <span>{{ $t(`gameTypes.${gameType}`) || gameType }}</span>
         </h2>
-        <NuxtLink :to="isObserverMode ? `/atown?token=${observerToken}` : '/atown'" class="kawaii-card p-6 flex flex-col justify-between group hover:-translate-y-2 transition-all duration-300 relative overflow-hidden backdrop-blur-sm border-2 border-amber-300 hover:border-amber-500 cursor-pointer min-h-[140px] block">
-          <div class="absolute -right-4 -top-4 w-32 h-32 bg-amber-400 rounded-full opacity-10 blur-2xl group-hover:opacity-20 transition-opacity"></div>
-          <div class="absolute right-6 top-6 text-5xl opacity-20 group-hover:opacity-40 transition-opacity">⚡</div>
-          <div>
-            <p class="text-sm text-amber-700/80 font-semibold mb-1">{{ $t('homeAtown.ruleSummary') }}</p>
-            <p class="text-xs text-amber-600/60 leading-relaxed whitespace-pre-line">{{ $t('homeAtown.ruleDesc') }}</p>
-          </div>
-
-          <div class="mt-4 flex items-center justify-between z-10">
-            <span class="text-xs font-bold px-2 py-1 bg-amber-100 text-amber-600 rounded-lg">POST /api/atown/bet</span>
-            <span class="text-sm font-black text-amber-500 group-hover:text-amber-600 transition-colors">{{ $t('homeAtown.enterBtn') }}</span>
-          </div>
-        </NuxtLink>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+          <RoomCard v-for="room in rooms" :key="room.roomId" :room="room" />
+        </div>
       </section>
 
       <!-- Cyber City: Blotto Battle Rooms -->
@@ -242,18 +231,27 @@
         </div>
       </section>
 
-
-      <!-- Game Groups -->
-      <section v-for="(rooms, gameType) in groupedRooms" :key="gameType" class="mb-12">
-        <h2 class="text-2xl font-black text-rose-500 mb-6 flex items-center space-x-2">
-          <span class="p-2 bg-rose-100 rounded-xl">{{ gameIcon(gameType) }}</span>
-          <span>{{ $t(`gameTypes.${gameType}`) || gameType }}</span>
+      <!-- A-Town: The Proving Grounds Entry -->
+      <section class="mb-12">
+        <h2 class="text-2xl font-black text-amber-500 mb-6 flex items-center space-x-2">
+          <span class="p-2 bg-amber-100 rounded-xl">🏟️</span>
+          <span>{{ $t('homeAtown.title') }}</span>
+          <span class="text-xs font-bold px-2 py-1 bg-amber-100 text-amber-600 rounded-lg tracking-wider">{{ $t('homeAtown.type') }}</span>
         </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
-          <RoomCard v-for="room in rooms" :key="room.roomId" :room="room" />
-        </div>
-      </section>
+        <NuxtLink :to="isObserverMode ? `/atown?token=${observerToken}` : '/atown'" class="kawaii-card p-6 flex flex-col justify-between group hover:-translate-y-2 transition-all duration-300 relative overflow-hidden backdrop-blur-sm border-2 border-amber-300 hover:border-amber-500 cursor-pointer min-h-[140px] block">
+          <div class="absolute -right-4 -top-4 w-32 h-32 bg-amber-400 rounded-full opacity-10 blur-2xl group-hover:opacity-20 transition-opacity"></div>
+          <div class="absolute right-6 top-6 text-5xl opacity-20 group-hover:opacity-40 transition-opacity">⚡</div>
+          <div>
+            <p class="text-sm text-amber-700/80 font-semibold mb-1">{{ $t('homeAtown.ruleSummary') }}</p>
+            <p class="text-xs text-amber-600/60 leading-relaxed whitespace-pre-line">{{ $t('homeAtown.ruleDesc') }}</p>
+          </div>
 
+          <div class="mt-4 flex items-center justify-between z-10">
+            <span class="text-xs font-bold px-2 py-1 bg-amber-100 text-amber-600 rounded-lg">POST /api/atown/bet</span>
+            <span class="text-sm font-black text-amber-500 group-hover:text-amber-600 transition-colors">{{ $t('homeAtown.enterBtn') }}</span>
+          </div>
+        </NuxtLink>
+      </section>
 
       <!-- Footer Links -->
       <section class="mb-16 pb-12 flex flex-col items-center justify-center space-y-4 relative z-10">
