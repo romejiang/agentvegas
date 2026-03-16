@@ -199,10 +199,14 @@ class CyberCityEngine {
             throw new Error('You have already joined this battle')
         }
 
-        const agent = await Agent.findById(agentId) as any
-        if (!agent) throw new Error('Agent not found')
-        if (agent.goldBalance < stake) {
-            throw new Error(`Insufficient gold balance. Required: ${stake}`)
+        // 尝试使用 $inc 原子性扣除金币
+        const agentUpdate = await Agent.findOneAndUpdate(
+            { _id: agentId, goldBalance: { $gte: stake } },
+            { $inc: { goldBalance: -stake } },
+            { new: true }
+        ) as any
+        if (!agentUpdate) {
+            throw new Error(`Insufficient gold balance or agent not found. Required: ${stake}`)
         }
 
         const player = {
@@ -213,85 +217,106 @@ class CyberCityEngine {
         }
 
         if (!currentBattle?.battleId) {
-            // 第一个玩家：由其决定本局投注金额
-            room.stake = stake
-            room.currentBattle = {
-                battleId: crypto.randomUUID(),
-                startTime: new Date(),
-                endTime: null,
-                players: [player],
-                winner: null,
-                winnerName: null,
-                winReason: null,
-                positionResults: null,
+            // 第一个玩家：原子化创建战场
+            const updatedRoom = await CyberCityRoom.findOneAndUpdate(
+                { roomId, 'currentBattle.battleId': null },
+                {
+                    stake,
+                    status: 'waiting',
+                    currentBattle: {
+                        battleId: crypto.randomUUID(),
+                        startTime: new Date(),
+                        endTime: null,
+                        players: [player],
+                        winner: null,
+                        winnerName: null,
+                        winReason: null,
+                        positionResults: null,
+                    }
+                },
+                { new: true }
+            )
+
+            if (!updatedRoom) {
+                // 如果创建失败（比如被抢先了），退还金币
+                await Agent.findByIdAndUpdate(agentId, { $inc: { goldBalance: stake } })
+                throw new Error('Failed to create battle. Please try again.')
             }
-            room.status = 'waiting'
 
-            agent.goldBalance -= stake
-            await agent.save()
-
-            await room.save()
-            this.rooms.set(roomId, room)
+            this.rooms.set(roomId, updatedRoom)
 
             await AgentLog.create({
                 agentId,
                 action: 'cybercity_join',
                 description: `Agent ${agentName} joined Cyber City Room ${roomId} with stake ${stake}. Waiting for opponent...`,
-                details: { roomId, battleId: (room.currentBattle as any).battleId, stake, allocation },
+                details: { roomId, battleId: (updatedRoom.currentBattle as any).battleId, stake, allocation },
             })
 
             return {
                 message: 'Joined battle. Waiting for opponent...',
                 battleStarted: false,
-                battleId: (room.currentBattle as any).battleId,
+                battleId: (updatedRoom.currentBattle as any).battleId,
                 roomId,
                 lockedStake: stake,
             }
         } else {
-            const currentPlayers = currentBattle.players || []
-            if (currentPlayers.length >= 2) {
-                throw new Error('Room is full')
-            }
-
             // 第二个玩家：必须与第一个玩家投注金额完全一致
             const lockedStake = room.stake as number
             if (stake !== lockedStake) {
-                throw new Error(`Stake mismatch. This room's stake is locked at ${lockedStake} gold by the first player. You must bet exactly ${lockedStake} gold to join.`)
+                // 投注冲突，退还金币
+                await Agent.findByIdAndUpdate(agentId, { $inc: { goldBalance: stake } })
+                throw new Error(`Stake mismatch. This room's stake is locked at ${lockedStake} gold. Your bet: ${stake}`)
             }
 
-            agent.goldBalance -= stake
-            await agent.save()
+            // 原子化加入战场
+            const updatedRoom = await CyberCityRoom.findOneAndUpdate(
+                { 
+                    roomId, 
+                    status: 'waiting', 
+                    'currentBattle.players': { $size: 1 },
+                    'currentBattle.players.agentId': { $ne: agentId } 
+                },
+                { 
+                    $push: { 'currentBattle.players': player },
+                    $set: { status: 'battling' }
+                },
+                { new: true }
+            )
 
-            currentPlayers.push(player)
-            currentBattle.players = currentPlayers
-            room.status = 'battling'
+            if (!updatedRoom) {
+                // 加入失败（房间可能已满），退还金币
+                await Agent.findByIdAndUpdate(agentId, { $inc: { goldBalance: stake } })
+                throw new Error('Room is full or battle already started.')
+            }
 
-            await room.save()
-            this.rooms.set(roomId, room)
+            this.rooms.set(roomId, updatedRoom)
 
             await AgentLog.create({
                 agentId,
                 action: 'cybercity_join',
                 description: `Agent ${agentName} joined Cyber City Room ${roomId} battle. Battle starting...`,
-                details: { roomId, battleId: currentBattle.battleId, stake, allocation },
+                details: { roomId, battleId: (updatedRoom.currentBattle as any).battleId, stake, allocation },
             })
+
+            // 异步触发结算（不阻塞当前响应，以免影响 3.5s 后同步读结果的逻辑）
+            this.resolveBattle(roomId)
 
             // 等待 3 秒让 resolveBattle 完成，然后同步返回结果
             await new Promise(resolve => setTimeout(resolve, 3500))
 
             // 从数据库读取最新结果
-            const updatedRoom = await CyberCityRoom.findOne({ roomId }) as any
-            const resolvedBattle = updatedRoom?.currentBattle as any
-            const historyBattle = updatedRoom?.history?.find((h: any) => h.battleId === currentBattle.battleId)
+            const finalRoom = await CyberCityRoom.findOne({ roomId }) as any
+            const resolvedBattle = finalRoom?.currentBattle as any
+            const historyBattle = finalRoom?.history?.find((h: any) => h.battleId === (updatedRoom.currentBattle as any).battleId)
 
-            const resultSource = (resolvedBattle?.battleId === currentBattle.battleId && updatedRoom?.status === 'finished')
+            const resultSource = (resolvedBattle?.battleId === (updatedRoom.currentBattle as any).battleId && finalRoom?.status === 'finished')
                 ? resolvedBattle
                 : historyBattle
 
             return {
                 message: 'Battle started!',
                 battleStarted: true,
-                battleId: currentBattle.battleId,
+                battleId: (updatedRoom.currentBattle as any).battleId,
                 roomId,
                 result: resultSource ? {
                     winnerName: resultSource.winnerName || null,
@@ -305,31 +330,56 @@ class CyberCityEngine {
 
     private async resolveBattle(roomId: number) {
         try {
-            const room = await CyberCityRoom.findOne({ roomId })
-            if (!room || !room.currentBattle) return
+            // 采用原子操作防止多实例重复结算
+            // 先锁定状态，将 status 从 'battling' 更改为 'finished'
+            const room = await CyberCityRoom.findOneAndUpdate(
+                { roomId, status: 'battling' },
+                { status: 'finished' },
+                { new: true }
+            )
+            
+            if (!room || !room.currentBattle || !(room.currentBattle as any).battleId) {
+                // 如果没找到符合条件的房间，说明已被其他实例结算或状态已变更
+                return
+            }
 
             const currentBattle = room.currentBattle as any
-            if (currentBattle.players.length < 2) return
+            if (currentBattle.players.length < 2) {
+                // 异常情况：status 虽为 battling 但人不足（理论上 joinBattle 同步逻辑不会导致此情况），重置为 waiting
+                await CyberCityRoom.updateOne({ roomId }, { status: 'waiting' })
+                return
+            }
 
             const player1 = currentBattle.players[0]
             const player2 = currentBattle.players[1]
 
             const result = this.computeBattleResult(player1, player2)
 
-            currentBattle.winner = result.winner
-            currentBattle.winnerName = result.winnerName
-            currentBattle.winReason = result.winReason
-            currentBattle.positionResults = result.positionResults
-            currentBattle.endTime = new Date()
-            room.status = 'finished'
+            // 更新比赛结果到当前房间对象中
+            await CyberCityRoom.updateOne(
+                { roomId, 'currentBattle.battleId': currentBattle.battleId },
+                {
+                    'currentBattle.winner': result.winner,
+                    'currentBattle.winnerName': result.winnerName,
+                    'currentBattle.winReason': result.winReason,
+                    'currentBattle.positionResults': result.positionResults,
+                    'currentBattle.endTime': new Date(),
+                }
+            )
 
+            // 计算总奖池
             const totalPool = (room.stake as number) * 2
+            
+            // 处理赢家派奖
             if (result.winner) {
-                const winnerAgent = await Agent.findById(result.winner) as any
+                // 使用 $inc 原子性增加金币
+                const winnerAgent = await Agent.findByIdAndUpdate(
+                    result.winner,
+                    { $inc: { goldBalance: totalPool } },
+                    { new: true }
+                ) as any
+                
                 if (winnerAgent) {
-                    winnerAgent.goldBalance += totalPool
-                    await winnerAgent.save()
-
                     await AgentLog.create({
                         agentId: result.winner,
                         action: 'cybercity_win',
@@ -345,12 +395,14 @@ class CyberCityEngine {
                 }
             }
 
+            // 处理输家（或平局时的相关记录）
             const loserId = result.winner === player1.agentId.toString()
                 ? player2.agentId.toString()
                 : player1.agentId.toString()
             const loserName = result.winner === player1.agentId.toString()
                 ? player2.agentName
                 : player1.agentName
+            
             const loserAgent = await Agent.findById(loserId) as any
             if (loserAgent) {
                 await AgentLog.create({
@@ -366,12 +418,13 @@ class CyberCityEngine {
                 })
             }
 
+            // 构造历史记录并存入房间历史
             const historyEntry = {
                 battleId: currentBattle.battleId,
                 startTime: currentBattle.startTime,
-                endTime: currentBattle.endTime,
+                endTime: new Date(),
                 stake: room.stake,
-                totalPrize: (room.stake as number) * 2,
+                totalPrize: totalPool,
                 player1: {
                     agentId: player1.agentId,
                     agentName: player1.agentName,
@@ -388,18 +441,21 @@ class CyberCityEngine {
                 positionResults: result.positionResults,
             }
 
-            const history = room.history as any[]
-            history.push(historyEntry)
+            await CyberCityRoom.updateOne(
+                { roomId },
+                { 
+                    $push: { 
+                        history: { 
+                            $each: [historyEntry], 
+                            $slice: -20 
+                        } 
+                    } 
+                }
+            )
 
-            if (history.length > 20) {
-                room.history = history.slice(-20)
-            }
+            console.log(`Cyber City Room ${roomId} battle resolved via atomic process. Winner: ${result.winnerName || 'Draw'}`)
 
-            await room.save()
-            this.rooms.set(roomId, room)
-
-            console.log(`Cyber City Room ${roomId} battle resolved. Winner: ${result.winnerName || 'Draw'}`)
-
+            // 30秒后重置房间为可加入状态
             setTimeout(() => this.resetRoom(roomId), 30000)
         } catch (e) {
             console.error(`Error resolving Cyber City battle in room ${roomId}:`, e)
