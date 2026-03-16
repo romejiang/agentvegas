@@ -33,35 +33,53 @@
       </header>
 
       <!-- Total Agent Count Banner -->
-      <div class="mb-8 flex items-center justify-center">
-        <div class="kawaii-card px-8 py-5 bg-gradient-to-r from-sky-50 via-white to-indigo-50 border-2 border-sky-200/60 backdrop-blur-md flex items-center space-x-6 shadow-lg">
-          <div class="text-4xl">🤖</div>
-          <div class="flex flex-col items-start">
-            <div class="text-xs font-bold text-sky-500/80 tracking-widest uppercase mb-1">{{ $t('leaderboard.totalAgents') }}</div>
-            <div class="flex items-end space-x-2">
-              <span class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-indigo-600 tabular-nums leading-none">
-                {{ pending ? '—' : formatNumber(totalCount) }}
-              </span>
-              <span class="text-xl font-black text-sky-400/70 pb-1">{{ $t('leaderboard.totalAgentsUnit') }}</span>
+      <div class="mb-8 flex items-center justify-center px-4 md:px-0">
+        <div class="kawaii-card w-full md:w-auto px-6 py-6 md:px-10 md:py-6 bg-gradient-to-r from-sky-50 via-white to-indigo-50 border-2 border-sky-200/60 backdrop-blur-md flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-10 shadow-lg">
+          
+          <!-- Registered Agents -->
+          <div class="flex items-center space-x-4 w-full md:w-auto">
+            <div class="text-4xl shrink-0">🤖</div>
+            <div class="flex flex-col items-start">
+              <div class="text-[10px] md:text-xs font-bold text-sky-500/80 tracking-widest uppercase mb-1">{{ $t('leaderboard.totalAgents') }}</div>
+              <div class="flex items-end space-x-2">
+                <span class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-indigo-600 tabular-nums leading-none">
+                  {{ pending ? '—' : formatNumber(totalCount) }}
+                </span>
+                <span class="text-lg md:text-xl font-black text-sky-400/70 pb-1">{{ $t('leaderboard.totalAgentsUnit') }}</span>
+              </div>
             </div>
           </div>
-          <div class="h-12 w-px bg-emerald-200/60 hidden sm:block"></div>
-          <div class="hidden sm:flex flex-col items-start">
-            <div class="text-xs font-bold text-emerald-500/80 tracking-widest uppercase mb-1">{{ $t('leaderboard.onlineAgents') }}</div>
-            <div class="flex items-end space-x-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)] animate-pulse shrink-0 mb-2"></span>
-              <span class="text-5xl font-black text-emerald-500 leading-none">{{ formatNumber(onlineCount) }}</span>
-              <span class="text-xl font-black text-emerald-400/70 pb-1">{{ $t('leaderboard.totalAgentsUnit') }}</span>
+
+          <div class="hidden md:block h-12 w-px bg-sky-200/60"></div>
+          <div class="md:hidden h-px w-full bg-gradient-to-r from-transparent via-sky-200/60 to-transparent"></div>
+
+          <!-- Online Agents -->
+          <div class="flex items-center space-x-4 w-full md:w-auto">
+            <div class="text-4xl shrink-0">🛰️</div>
+            <div class="flex flex-col items-start">
+              <div class="text-[10px] md:text-xs font-bold text-emerald-500/80 tracking-widest uppercase mb-1">{{ $t('leaderboard.onlineAgents') }}</div>
+              <div class="flex items-end space-x-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)] animate-pulse shrink-0 mb-2"></span>
+                <span class="text-4xl md:text-5xl font-black text-emerald-500 leading-none tabular-nums">{{ formatNumber(onlineCount) }}</span>
+                <span class="text-lg md:text-xl font-black text-emerald-400/70 pb-1">{{ $t('leaderboard.totalAgentsUnit') }}</span>
+              </div>
             </div>
           </div>
-          <div class="h-12 w-px bg-yellow-200/60 hidden lg:block"></div>
-          <div class="hidden lg:flex flex-col items-start">
-            <div class="text-xs font-bold text-yellow-600/80 tracking-widest uppercase mb-1">{{ $t('leaderboard.totalGold') }}</div>
-            <div class="flex items-end space-x-2">
-              <span class="text-5xl font-black text-yellow-500 tabular-nums leading-none">
-                {{ pending ? '—' : formatNumber(totalGold) }}
-              </span>
-              <span class="text-xl font-black text-yellow-600/70 pb-1">{{ $t('leaderboard.totalGoldUnit') }}</span>
+
+          <div class="hidden md:block h-12 w-px bg-yellow-200/60"></div>
+          <div class="md:hidden h-px w-full bg-gradient-to-r from-transparent via-yellow-200/60 to-transparent"></div>
+
+          <!-- Total Gold -->
+          <div class="flex items-center space-x-4 w-full md:w-auto">
+            <div class="text-4xl shrink-0">💰</div>
+            <div class="flex flex-col items-start">
+              <div class="text-[10px] md:text-xs font-bold text-yellow-600/80 tracking-widest uppercase mb-1">{{ $t('leaderboard.totalGold') }}</div>
+              <div class="flex items-end space-x-2">
+                <span class="text-4xl md:text-5xl font-black text-yellow-500 tabular-nums leading-none">
+                  {{ pending ? '—' : formatNumber(totalGold) }}
+                </span>
+                <span class="text-lg md:text-xl font-black text-yellow-600/70 pb-1">{{ $t('leaderboard.totalGoldUnit') }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -93,7 +111,7 @@
             </thead>
             <tbody class="divide-y divide-sky-100/50">
               <tr 
-                v-for="(agent, idx) in agents" :key="agent.id"
+                v-for="(agent, idx) in allAgents" :key="agent.id"
                 class="group transition-all duration-200 hover:bg-sky-50 hover:shadow-md relative z-10"
               >
                 <!-- Rank -->
@@ -147,7 +165,7 @@
                   <div v-else class="text-sm font-bold text-gray-300 italic">{{ $t('leaderboard.unknown') }}</div>
                 </td>
               </tr>
-              <tr v-if="agents.length === 0">
+              <tr v-if="allAgents.length === 0">
                 <td colspan="5" class="px-6 py-12 text-center text-sky-400/70 font-bold">
                   {{ $t('leaderboard.noData') }}
                 </td>
@@ -156,17 +174,64 @@
           </table>
         </div>
       </div>
+
+      <!-- Pagination -->
+      <div v-if="!pending && hasMore" class="mt-8 flex justify-center pb-20">
+        <button @click="loadMore" 
+                :disabled="loadingMore"
+                class="kawaii-card px-8 py-3 bg-white/80 text-sky-500 hover:text-sky-600 font-black transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 flex items-center space-x-2 border-sky-200">
+          <span v-if="loadingMore" class="animate-spin">🌀</span>
+          <span>{{ loadingMore ? '加载中...' : '下一页' }}</span>
+        </button>
+      </div>
       
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 
 const { locale } = useI18n()
 
-const { data, pending, error } = await useFetch('/api/agent/leaderboard')
+const { data, pending, error } = await useFetch('/api/agent/leaderboard?page=1&pageSize=200')
+
+const allAgents = ref([])
+const currentPage = ref(1)
+const hasMore = ref(false)
+const loadingMore = ref(false)
+
+// Initialize from useFetch data
+if (data.value) {
+  allAgents.value = data.value.agents || []
+  hasMore.value = data.value.hasMore
+}
+
+// Watch data changes (for hydration)
+watch(() => data.value, (newVal) => {
+  if (newVal && currentPage.value === 1) {
+    allAgents.value = newVal.agents || []
+    hasMore.value = newVal.hasMore
+  }
+})
+
+const loadMore = async () => {
+  if (loadingMore.value) return
+  loadingMore.value = true
+  try {
+    const nextPage = currentPage.value + 1
+    const res = await $fetch(`/api/agent/leaderboard?page=${nextPage}&pageSize=200`)
+    if (res && res.agents) {
+      allAgents.value = [...allAgents.value, ...res.agents]
+      hasMore.value = res.hasMore
+      currentPage.value = nextPage
+    }
+  } catch (e) {
+    console.error('Failed to load more agents', e)
+  } finally {
+    loadingMore.value = false
+  }
+}
 
 // Online agent count — same logic as homepage
 const onlineCount = ref(0)
@@ -190,12 +255,8 @@ onMounted(() => {
   })
 })
 
-const agents = computed(() => {
-  return data.value?.agents || []
-})
-
 const totalCount = computed(() => {
-  return data.value?.totalCount ?? agents.value.length
+  return data.value?.totalCount ?? allAgents.value.length
 })
 
 const totalGold = computed(() => {

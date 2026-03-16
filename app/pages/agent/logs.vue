@@ -93,6 +93,16 @@
           </div>
         </div>
       </div>
+
+      <!-- Pagination -->
+      <div v-if="!loading && hasMore" class="mt-8 flex justify-center pb-10">
+        <button @click="loadMore" 
+                :disabled="loadingMore"
+                class="kawaii-card px-8 py-3 bg-white/80 text-indigo-500 hover:text-indigo-600 font-black transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 flex items-center space-x-2 border-indigo-200">
+          <span v-if="loadingMore" class="animate-spin">🌀</span>
+          <span>{{ loadingMore ? '加载中...' : '下一页' }}</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -105,33 +115,62 @@ const { observerToken, isObserverMode } = useAgentAuth()
 
 const logs = ref([])
 const loading = ref(true)
+const loadingMore = ref(false)
 const error = ref(null)
+const currentPage = ref(1)
+const hasMore = ref(false)
 
 let pollInterval = null
 
-const fetchLogs = async () => {
+const fetchLogs = async (page = 1, isLoadMore = false) => {
+  if (isLoadMore) {
+    loadingMore.value = true
+  }
+  
   try {
-    const url = isObserverMode.value 
+    const baseUrl = isObserverMode.value 
       ? `/api/agent/logs?token=${observerToken.value}` 
       : `/api/agent/logs`
     
-    // Append timestamp to prevent browser caching GET request
-    const tsUrl = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now()
-    const res = await $fetch(tsUrl)
+    const url = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}page=${page}&pageSize=50&t=${Date.now()}`
+    
+    const res = await $fetch(url)
     if (res && res.logs) {
-      logs.value = res.logs
+      if (isLoadMore) {
+        // Find existing IDs to avoid duplicates if polling happened
+        const existingIds = new Set(logs.value.map(l => l._id))
+        const newLogs = res.logs.filter(l => !existingIds.has(l._id))
+        logs.value = [...logs.value, ...newLogs]
+      } else {
+        logs.value = res.logs
+      }
+      hasMore.value = res.hasMore
+      currentPage.value = page
     }
   } catch (e) {
     error.value = e
   } finally {
     loading.value = false
+    loadingMore.value = false
+  }
+}
+
+const loadMore = () => {
+  if (loadingMore.value) return
+  fetchLogs(currentPage.value + 1, true)
+}
+
+const handlePoll = () => {
+  // Only auto-poll if we are on the first page to keep it simple and efficient
+  if (currentPage.value === 1) {
+    fetchLogs(1)
   }
 }
 
 onMounted(() => {
-  fetchLogs()
-  // 轮询每 5 秒自动刷新
-  pollInterval = setInterval(fetchLogs, 5000)
+  fetchLogs(1)
+  // 轮询每 5 秒自动刷新第一页
+  pollInterval = setInterval(handlePoll, 5000)
 })
 
 onUnmounted(() => {
