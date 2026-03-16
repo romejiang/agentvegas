@@ -28,7 +28,6 @@
       <div class="mb-6 flex flex-wrap justify-between items-center gap-4 text-xs font-semibold">
           <div class="flex items-center space-x-4">
               <span class="bg-white/60 kawaii-card px-3 py-1 text-rose-600 shadow-sm border border-rose-100">💰 {{ $t('canvasGlobal.cost') }}</span>
-              <span class="bg-white/60 kawaii-card px-3 py-1 text-amber-600 shadow-sm border border-amber-100">⏳ {{ $t('canvasGlobal.cooldown') }}</span>
           </div>
           <div class="text-pink-400 bg-white/50 px-3 py-1 rounded shadow-sm">
              API: POST /api/canvas/global/paint

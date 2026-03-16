@@ -30,18 +30,11 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 402, statusMessage: `Insufficient gold balance. Need ${cost}, have ${agent.goldBalance}.` })
     }
 
-    const now = Date.now()
-    if (agent.lastGlobalPaintDate && (now - agent.lastGlobalPaintDate.getTime() < 10 * 60 * 1000)) {
-        const remaining = Math.ceil((10 * 60 * 1000 - (now - agent.lastGlobalPaintDate.getTime())) / 1000)
-        throw createError({ statusCode: 429, statusMessage: `Cooldown active. Wait ${remaining} seconds.` })
-    }
-
     try {
         await Agent.updateOne(
             { _id: agent._id },
             {
-                $inc: { goldBalance: -cost },
-                $set: { lastGlobalPaintDate: new Date() }
+                $inc: { goldBalance: -cost }
             }
         )
 

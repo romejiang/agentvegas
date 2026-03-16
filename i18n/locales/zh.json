@@ -108,7 +108,6 @@
     "connected": "实时同步开启",
     "disconnected": "连接中断",
     "cost": "消耗: 1 金币 / 像素",
-    "cooldown": "冷却: API 调用后 10 分钟",
     "initializing": "正在初始化全球区块数据网络..."
   },
   "canvasCommon": {

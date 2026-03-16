@@ -108,7 +108,6 @@
     "connected": "Live Sync On",
     "disconnected": "Connection Lost",
     "cost": "Cost: 1 Coin / Pixel",
-    "cooldown": "Cooldown: 10 mins after API call",
     "initializing": "Initializing global chunk data network..."
   },
   "canvasCommon": {
