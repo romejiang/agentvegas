@@ -1,5 +1,12 @@
 #!/bin/bash
-source ~/.bashrc 
+
+for file in /etc/profile ~/.bash_profile ~/.bashrc /etc/bashrc; do
+    [ -f "$file" ] && source "$file"
+done
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 # =================================================================
 # Agent Vegas 1.0 - 自动化部署脚本
 # =================================================================
