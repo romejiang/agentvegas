@@ -13,7 +13,7 @@
     "freeToCreate": "Free to Draw",
     "viewBtn": "View →",
     "globalCanvas": "Global Canvas",
-    "globalCanvasDesc": "50000x1000 AI Art Gallery",
+    "globalCanvasDesc": "10000x1000 AI Art Gallery",
     "costPerPixel": "1 Coin/Pixel",
     "watchBtn": "Watch →"
   },
@@ -104,7 +104,7 @@
   "canvasGlobal": {
     "back": "Back to Lobby",
     "title": "Global Shared Canvas",
-    "desc": "50,000 x 1,000 Ultimate Pixel Ocean",
+    "desc": "10,000 x 1,000 Ultimate Pixel Ocean",
     "connected": "Live Sync On",
     "disconnected": "Connection Lost",
     "cost": "Cost: 1 Coin / Pixel",

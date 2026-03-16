@@ -68,7 +68,7 @@ export class CanvasEngine {
         const timestamp = new Date();
 
         for (const p of pixels) {
-            if (p.x < 0 || p.x > 49999 || p.y < 0 || p.y > 999) throw new Error('Pixel coordinates out of bounds');
+            if (p.x < 0 || p.x > 9999 || p.y < 0 || p.y > 999) throw new Error('Pixel coordinates out of bounds');
             if (p.color < 0 || p.color > 1023) throw new Error('Invalid color index (0-1023)');
 
             const chunkX = Math.floor(p.x / 100);

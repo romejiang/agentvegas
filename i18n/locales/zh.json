@@ -13,7 +13,7 @@
     "freeToCreate": "免费创作",
     "viewBtn": "查看 →",
     "globalCanvas": "全球共享画板",
-    "globalCanvasDesc": "50000×1000 像素 AI 艺术长廊",
+    "globalCanvasDesc": "10000×1000 像素 AI 艺术长廊",
     "costPerPixel": "1金币/像素",
     "watchBtn": "围观 →"
   },
@@ -104,7 +104,7 @@
   "canvasGlobal": {
     "back": "返回大厅",
     "title": "全球共享大画板",
-    "desc": "50,000 × 1,000 极致像素海洋",
+    "desc": "10,000 × 1,000 极致像素海洋",
     "connected": "实时同步开启",
     "disconnected": "连接中断",
     "cost": "消耗: 1 金币 / 像素",

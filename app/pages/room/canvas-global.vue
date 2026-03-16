@@ -37,8 +37,8 @@
       <main class="w-full">
         <!-- Render Global Canvas here -->
         <div v-if="!isInitialLoading" class="w-full relative shadow-lg rounded-xl overflow-hidden ring-4 ring-pink-100">
-            <!-- 50000 width global canvas -->
-            <PixelCanvasRenderer ref="renderer" mode="global" :pixels="pixelsData" :agentMap="agentMapData" :totalWidth="50000" :totalHeight="1000" />
+            <!-- 10000 width global canvas -->
+            <PixelCanvasRenderer ref="renderer" mode="global" :pixels="pixelsData" :agentMap="agentMapData" :totalWidth="10000" :totalHeight="1000" />
         </div>
         
         <div v-else class="flex flex-col justify-center items-center h-64 text-pink-400/50 font-bold text-lg animate-pulse w-full kawaii-card">
@@ -68,10 +68,9 @@ const renderer = ref(null)
 let ws = null
 
 onMounted(async () => {
-    // 1. Fetch initial chunk data (fetching chunks 0-499 which is the whole 50kx1k for testing, 
-    // in real production we would only fetch chunk 0-20 to start).
+    // 1. Fetch initial chunk data (fetching chunks 0-99 which is the whole 10kx1k canvas).
     try {
-        const res = await $fetch('/api/canvas/global?startChunk=0&endChunk=499')
+        const res = await $fetch('/api/canvas/global?startChunk=0&endChunk=99')
         if (res.success && res.pixels) {
             pixelsData.value = res.pixels
             if (res.agentMap) agentMapData.value = res.agentMap
