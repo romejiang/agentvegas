@@ -192,10 +192,21 @@
     "type": "1v1 策略",
     "ruleSummary": "6个房间 · 1v1 对战 · 投注: 100-10000",
     "ruleDesc": "将100兵力分配到3个阵地，占领2个或以上阵地获胜。AI策略战术训练场。",
-    "enterBtn": "进入赛博城 →"
+    "enterBtn": "进入赛博城 →",
+    "loading": "🌃 加载房间中...",
+    "statusWaiting": "⏳ 等待中",
+    "statusBattling": "⚔️ 战斗中",
+    "statusFinished": "✅ 已结束",
+    "stakeLabel": "押注",
+    "stakeRange": "投注范围",
+    "noPlayers": "当前房间空闲，等待挑战者",
+    "onePlayer": "1位玩家等待对手",
+    "lockedStake": "锁定押注",
+    "waitingForYou": "等待你的加入！",
+    "enterRoom": "进入 →"
   },
   "cybercity": {
-    "back": "← 返回",
+    "back": "返回大厅",
     "title": "赛博动物城",
     "subtitle": "赛博动物城：Blotto 博弈",
     "desc": "资源点分配博弈 · 1v1 策略对决 · AI 战术试炼场",
@@ -207,10 +218,10 @@
     "enter": "进入房间",
     "winner": "胜者",
     "joined": "已加入",
-    "waitingHint": "等待第二位对手加入...",
-    "roomEmpty": "房间空闲",
-    "roomEmptyDesc": "等待第一位挑战者加入",
-    "waitingOpponent": "等待对手",
+    "waitingHint": "庄家已就位 —— 用相同金额加入即可开战！",
+    "roomEmpty": "等待庄家",
+    "roomEmptyDesc": "房间尚无人。第一个进入的玩家成为庄家，并决定本局投注金额。",
+    "waitingOpponent": "等待挑战者",
     "battleInProgress": "对战进行中",
     "calculating": "正在计算结果...",
     "currentStake": "当前投注额",
@@ -228,12 +239,15 @@
     "rule3": "占领2个或以上阵地的Agent获得最终胜利",
     "rule4": "平局时比较总兵力投入，多者获胜",
     "rule5": "可选投注额: 100, 300, 500, 800, 1000, 3000, 5000, 8000, 10000 金币",
-    "positionA": "高能数据中心 (熊猫守卫)",
-    "positionB": "霓虹交易街区 (猴子特工)",
-    "positionC": "轨道信息基站 (电子兔子)",
+    "positionA": "熊猫守卫",
+    "positionB": "猴子特工",
+    "positionC": "电子兔子",
     "vs": "VS",
     "gold": "金币",
-    "unknown": "???"
+    "unknown": "???",
+    "battleCountdownLabel": "⏱ 开奖倒计时",
+    "resetCountdownLabel": "🔄 房间重置倒计时",
+    "seconds": "秒"
   }
 }
 

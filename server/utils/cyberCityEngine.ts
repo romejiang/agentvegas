@@ -51,9 +51,9 @@ class CyberCityEngine {
                 for (let i = 1; i <= 6; i++) {
                     defaultRooms.push({
                         roomId: i,
-                        name: `赛博房间 ${i}`,
+                        name: `Room ${i}`,
                         status: 'waiting',
-                        stake: 100,
+                        stake: null,
                         currentBattle: null,
                         history: [],
                     })
@@ -80,7 +80,8 @@ class CyberCityEngine {
             this.rooms.set(room.roomId as number, room)
 
             const currentBattle = room.currentBattle as any
-            const battleInfo = currentBattle ? {
+            // Mongoose 嵌套对象即使 DB 里为 null，读出来也是空对象 {}，必须用 battleId 判断真实状态
+            const battleInfo = currentBattle?.battleId ? {
                 battleId: currentBattle.battleId,
                 startTime: currentBattle.startTime,
                 playerCount: currentBattle.players?.length || 0,
@@ -117,15 +118,23 @@ class CyberCityEngine {
         this.rooms.set(roomId, room)
 
         const currentBattle = room.currentBattle as any
-        const battleInfo = currentBattle ? {
+        // Mongoose 嵌套对象即使 DB 里为 null，读出来也是空对象 {}，必须用 battleId 判断真实状态
+        const isFinished = room.status === 'finished'
+        const battleInfo = currentBattle?.battleId ? {
             battleId: currentBattle.battleId,
             startTime: currentBattle.startTime,
             endTime: currentBattle.endTime,
-            players: currentBattle.players || [],
+            // 未结束时隐藏 allocation，防止第二个玩家看到对手策略
+            players: (currentBattle.players || []).map((p: any) => ({
+                agentId: p.agentId,
+                agentName: p.agentName,
+                joinTime: p.joinTime,
+                allocation: isFinished ? p.allocation : null,
+            })),
             winner: currentBattle.winner,
             winnerName: currentBattle.winnerName,
             winReason: currentBattle.winReason,
-            positionResults: room.status === 'finished' ? currentBattle.positionResults : null,
+            positionResults: isFinished ? currentBattle.positionResults : null,
             totalPrize: (room.stake as number) * 2,
         } : null
 
@@ -145,7 +154,19 @@ class CyberCityEngine {
         agentName: string,
         stake: number,
         allocation: Allocation
-    ): Promise<{ message: string; battleStarted?: boolean }> {
+    ): Promise<{
+        message: string
+        battleStarted: boolean
+        battleId: string
+        roomId: number
+        lockedStake?: number
+        result?: {
+            winnerName: string | null
+            winReason: string | null
+            positionResults: any
+            prize: number
+        } | null
+    }> {
         if (!VALID_STAKES.includes(stake)) {
             throw new Error(`Invalid stake. Must be one of: ${VALID_STAKES.join(', ')}`)
         }
@@ -184,10 +205,6 @@ class CyberCityEngine {
             throw new Error(`Insufficient gold balance. Required: ${stake}`)
         }
 
-        if (!currentBattle) {
-            room.stake = stake
-        }
-
         const player = {
             agentId,
             agentName,
@@ -195,7 +212,9 @@ class CyberCityEngine {
             joinTime: new Date(),
         }
 
-        if (!currentBattle || !currentBattle.players) {
+        if (!currentBattle?.battleId) {
+            // 第一个玩家：由其决定本局投注金额
+            room.stake = stake
             room.currentBattle = {
                 battleId: crypto.randomUUID(),
                 startTime: new Date(),
@@ -221,11 +240,23 @@ class CyberCityEngine {
                 details: { roomId, battleId: (room.currentBattle as any).battleId, stake, allocation },
             })
 
-            return { message: 'Joined battle. Waiting for opponent...', battleStarted: false }
+            return {
+                message: 'Joined battle. Waiting for opponent...',
+                battleStarted: false,
+                battleId: (room.currentBattle as any).battleId,
+                roomId,
+                lockedStake: stake,
+            }
         } else {
             const currentPlayers = currentBattle.players || []
             if (currentPlayers.length >= 2) {
                 throw new Error('Room is full')
+            }
+
+            // 第二个玩家：必须与第一个玩家投注金额完全一致
+            const lockedStake = room.stake as number
+            if (stake !== lockedStake) {
+                throw new Error(`Stake mismatch. This room's stake is locked at ${lockedStake} gold by the first player. You must bet exactly ${lockedStake} gold to join.`)
             }
 
             agent.goldBalance -= stake
@@ -245,9 +276,30 @@ class CyberCityEngine {
                 details: { roomId, battleId: currentBattle.battleId, stake, allocation },
             })
 
-            setTimeout(() => this.resolveBattle(roomId), 3000)
+            // 等待 3 秒让 resolveBattle 完成，然后同步返回结果
+            await new Promise(resolve => setTimeout(resolve, 3500))
 
-            return { message: 'Battle started!', battleStarted: true }
+            // 从数据库读取最新结果
+            const updatedRoom = await CyberCityRoom.findOne({ roomId }) as any
+            const resolvedBattle = updatedRoom?.currentBattle as any
+            const historyBattle = updatedRoom?.history?.find((h: any) => h.battleId === currentBattle.battleId)
+
+            const resultSource = (resolvedBattle?.battleId === currentBattle.battleId && updatedRoom?.status === 'finished')
+                ? resolvedBattle
+                : historyBattle
+
+            return {
+                message: 'Battle started!',
+                battleStarted: true,
+                battleId: currentBattle.battleId,
+                roomId,
+                result: resultSource ? {
+                    winnerName: resultSource.winnerName || null,
+                    winReason: resultSource.winReason || null,
+                    positionResults: resultSource.positionResults || null,
+                    prize: (stake as number) * 2,
+                } : null,
+            }
         }
     }
 
@@ -359,9 +411,9 @@ class CyberCityEngine {
         const p2Wins: string[] = []
 
         const positions = [
-            { key: 'positionA', name: '高能数据中心' },
-            { key: 'positionB', name: '霓虹交易街区' },
-            { key: 'positionC', name: '轨道信息基站' },
+            { key: 'positionA', name: 'Panda Guard' },
+            { key: 'positionB', name: 'Monkey Agent' },
+            { key: 'positionC', name: 'Cyber Rabbit' },
         ]
 
         const positionResults: any = {}
@@ -445,6 +497,7 @@ class CyberCityEngine {
                 {
                     status: 'waiting',
                     currentBattle: null,
+                    stake: null,  // 重置后无人状态，stake 清空
                 },
                 { new: true }
             )

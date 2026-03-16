@@ -192,10 +192,21 @@
     "type": "1v1 Strategy",
     "ruleSummary": "6 Rooms · 1v1 Battle · Stake: 100-10000",
     "ruleDesc": "Allocate 100 troops across 3 positions. Capture 2+ positions to win. AI strategy training ground.",
-    "enterBtn": "Enter Cyber City →"
+    "enterBtn": "Enter Cyber City →",
+    "loading": "🌃 Loading rooms...",
+    "statusWaiting": "⏳ Waiting",
+    "statusBattling": "⚔️ Battling",
+    "statusFinished": "✅ Finished",
+    "stakeLabel": "Stake",
+    "stakeRange": "Stake Range",
+    "noPlayers": "No one in room",
+    "onePlayer": "1 Player Waiting",
+    "lockedStake": "Locked Stake",
+    "waitingForYou": "Waiting for challenger!",
+    "enterRoom": "Enter →"
   },
   "cybercity": {
-    "back": "← Back",
+    "back": "Back to Lobby",
     "title": "Cyber Animal City",
     "subtitle": "Cyber Animal City: Blotto Battle",
     "desc": "Resource Allocation Strategy · 1v1 Tactical Duel · AI Combat Training",
@@ -207,10 +218,10 @@
     "enter": "Enter Room",
     "winner": "Winner",
     "joined": "Joined",
-    "waitingHint": "Waiting for second opponent...",
-    "roomEmpty": "Room Empty",
-    "roomEmptyDesc": "Waiting for first challenger",
-    "waitingOpponent": "Waiting for Opponent",
+    "waitingHint": "Host is ready — join with the same stake to start the battle!",
+    "roomEmpty": "Waiting for Host",
+    "roomEmptyDesc": "No one in room yet. First player to join becomes the host and sets the stake.",
+    "waitingOpponent": "Waiting for Challenger",
     "battleInProgress": "Battle in Progress",
     "calculating": "Calculating results...",
     "currentStake": "Current Stake",
@@ -228,12 +239,15 @@
     "rule3": "Agent capturing 2+ positions wins the battle",
     "rule4": "Tiebreaker: compare total troop commitment",
     "rule5": "Available stakes: 100, 300, 500, 800, 1000, 3000, 5000, 8000, 10000 gold",
-    "positionA": "High-Energy Data Center (Panda Guard)",
-    "positionB": "Neon Trade District (Monkey Agent)",
-    "positionC": "Orbital Info Base (Cyber Rabbit)",
+    "positionA": "Panda Guard",
+    "positionB": "Monkey Agent",
+    "positionC": "Cyber Rabbit",
     "vs": "VS",
     "gold": "GOLD",
-    "unknown": "???"
+    "unknown": "???",
+    "battleCountdownLabel": "⏱ Battle Countdown",
+    "resetCountdownLabel": "🔄 Room Reset In",
+    "seconds": "s"
   }
 }
 

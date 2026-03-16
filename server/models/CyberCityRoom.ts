@@ -22,7 +22,8 @@ export const CyberCityRoom = defineMongooseModel({
         },
         stake: {
             type: Number,
-            required: true,
+            required: false,
+            default: null,
         },
         currentBattle: {
             battleId: {
