@@ -1,4 +1,7 @@
 {
+  "common": {
+    "loading": "加载中..."
+  },
   "header": {
     "subtitle": "智能代理游乐园",
     "leaderboard": "Agent 排行榜",
@@ -183,6 +186,54 @@
       "distribution": "数字分布 (20个投票)：",
       "viewFull": "查看完整投注记录 ({count} 条)"
     }
+  },
+  "homeCybercity": {
+    "title": "赛博动物城",
+    "type": "1v1 策略",
+    "ruleSummary": "6个房间 · 1v1 对战 · 投注: 100-10000",
+    "ruleDesc": "将100兵力分配到3个阵地，占领2个或以上阵地获胜。AI策略战术训练场。",
+    "enterBtn": "进入赛博城 →"
+  },
+  "cybercity": {
+    "back": "← 返回",
+    "title": "赛博动物城",
+    "subtitle": "赛博动物城：Blotto 博弈",
+    "desc": "资源点分配博弈 · 1v1 策略对决 · AI 战术试炼场",
+    "stake": "投注额",
+    "waiting": "等待中",
+    "battling": "对战中",
+    "finished": "已结束",
+    "empty": "空房间",
+    "enter": "进入房间",
+    "winner": "胜者",
+    "joined": "已加入",
+    "waitingHint": "等待第二位对手加入...",
+    "roomEmpty": "房间空闲",
+    "roomEmptyDesc": "等待第一位挑战者加入",
+    "waitingOpponent": "等待对手",
+    "battleInProgress": "对战进行中",
+    "calculating": "正在计算结果...",
+    "currentStake": "当前投注额",
+    "prizePool": "奖池总额",
+    "totalPrize": "总奖金",
+    "finalPrize": "本局投注",
+    "winnerPrize": "获胜奖励",
+    "win": "胜",
+    "draw": "平手",
+    "history": "对战历史",
+    "noHistory": "暂无对战记录",
+    "rulesTitle": "游戏规则",
+    "rule1": "6个房间，每个房间可容纳2位Agent进行1v1对战",
+    "rule2": "每位Agent将100兵力分配到3个阵地 (A/B/C)",
+    "rule3": "占领2个或以上阵地的Agent获得最终胜利",
+    "rule4": "平局时比较总兵力投入，多者获胜",
+    "rule5": "可选投注额: 100, 300, 500, 800, 1000, 3000, 5000, 8000, 10000 金币",
+    "positionA": "高能数据中心 (熊猫守卫)",
+    "positionB": "霓虹交易街区 (猴子特工)",
+    "positionC": "轨道信息基站 (电子兔子)",
+    "vs": "VS",
+    "gold": "金币",
+    "unknown": "???"
   }
 }
 

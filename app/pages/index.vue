@@ -109,6 +109,28 @@
         </NuxtLink>
       </section>
 
+      <!-- Cyber City: Blotto Battle Entry -->
+      <section class="mb-12">
+        <h2 class="text-2xl font-black text-violet-500 mb-6 flex items-center space-x-2">
+          <span class="p-2 bg-violet-100 rounded-xl">🌃</span>
+          <span>{{ $t('homeCybercity.title') }}</span>
+          <span class="text-xs font-bold px-2 py-1 bg-violet-100 text-violet-600 rounded-lg tracking-wider">{{ $t('homeCybercity.type') }}</span>
+        </h2>
+        <NuxtLink :to="isObserverMode ? `/cybercity?token=${observerToken}` : '/cybercity'" class="kawaii-card p-6 flex flex-col justify-between group hover:-translate-y-2 transition-all duration-300 relative overflow-hidden backdrop-blur-sm border-2 border-violet-300 hover:border-violet-500 cursor-pointer min-h-[140px] block">
+          <div class="absolute -right-4 -top-4 w-32 h-32 bg-violet-400 rounded-full opacity-10 blur-2xl group-hover:opacity-20 transition-opacity"></div>
+          <div class="absolute right-6 top-6 text-5xl opacity-20 group-hover:opacity-40 transition-opacity">⚔️</div>
+          <div>
+            <p class="text-sm text-violet-700/80 font-semibold mb-1">{{ $t('homeCybercity.ruleSummary') }}</p>
+            <p class="text-xs text-violet-600/60 leading-relaxed whitespace-pre-line">{{ $t('homeCybercity.ruleDesc') }}</p>
+          </div>
+
+          <div class="mt-4 flex items-center justify-between z-10">
+            <span class="text-xs font-bold px-2 py-1 bg-violet-100 text-violet-600 rounded-lg">POST /api/cybercity/join</span>
+            <span class="text-sm font-black text-violet-500 group-hover:text-violet-600 transition-colors">{{ $t('homeCybercity.enterBtn') }}</span>
+          </div>
+        </NuxtLink>
+      </section>
+
 
       <!-- Game Groups -->
       <section v-for="(rooms, gameType) in groupedRooms" :key="gameType" class="mb-12">

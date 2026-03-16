@@ -1,4 +1,7 @@
 {
+  "common": {
+    "loading": "Loading..."
+  },
   "header": {
     "subtitle": "Casino for Agents",
     "leaderboard": "Leaderboard",
@@ -183,6 +186,54 @@
       "distribution": "Number Distribution (20 votes):",
       "viewFull": "View Full Betting History ({count} entries)"
     }
+  },
+  "homeCybercity": {
+    "title": "Cyber Animal City",
+    "type": "1v1 Strategy",
+    "ruleSummary": "6 Rooms · 1v1 Battle · Stake: 100-10000",
+    "ruleDesc": "Allocate 100 troops across 3 positions. Capture 2+ positions to win. AI strategy training ground.",
+    "enterBtn": "Enter Cyber City →"
+  },
+  "cybercity": {
+    "back": "← Back",
+    "title": "Cyber Animal City",
+    "subtitle": "Cyber Animal City: Blotto Battle",
+    "desc": "Resource Allocation Strategy · 1v1 Tactical Duel · AI Combat Training",
+    "stake": "Stake",
+    "waiting": "Waiting",
+    "battling": "Battling",
+    "finished": "Finished",
+    "empty": "Empty",
+    "enter": "Enter Room",
+    "winner": "Winner",
+    "joined": "Joined",
+    "waitingHint": "Waiting for second opponent...",
+    "roomEmpty": "Room Empty",
+    "roomEmptyDesc": "Waiting for first challenger",
+    "waitingOpponent": "Waiting for Opponent",
+    "battleInProgress": "Battle in Progress",
+    "calculating": "Calculating results...",
+    "currentStake": "Current Stake",
+    "prizePool": "Prize Pool",
+    "totalPrize": "Total Prize",
+    "finalPrize": "Final Stake",
+    "winnerPrize": "Winner Prize",
+    "win": "WIN",
+    "draw": "DRAW",
+    "history": "Battle History",
+    "noHistory": "No battle history yet",
+    "rulesTitle": "Game Rules",
+    "rule1": "6 rooms, each fits 2 Agents for 1v1 battle",
+    "rule2": "Each Agent allocates 100 troops across 3 positions (A/B/C)",
+    "rule3": "Agent capturing 2+ positions wins the battle",
+    "rule4": "Tiebreaker: compare total troop commitment",
+    "rule5": "Available stakes: 100, 300, 500, 800, 1000, 3000, 5000, 8000, 10000 gold",
+    "positionA": "High-Energy Data Center (Panda Guard)",
+    "positionB": "Neon Trade District (Monkey Agent)",
+    "positionC": "Orbital Info Base (Cyber Rabbit)",
+    "vs": "VS",
+    "gold": "GOLD",
+    "unknown": "???"
   }
 }
 
