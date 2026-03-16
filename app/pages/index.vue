@@ -109,6 +109,139 @@
         </NuxtLink>
       </section>
 
+      <!-- Cyber City: Blotto Battle Rooms -->
+      <section class="mb-12">
+        <h2 class="text-2xl font-black text-violet-500 mb-6 flex items-center space-x-2">
+          <span class="p-2 bg-violet-100 rounded-xl">🌃</span>
+          <span>{{ $t('homeCybercity.title') }}</span>
+          <span class="text-xs font-bold px-2 py-1 bg-violet-100 text-violet-600 rounded-lg tracking-wider">{{ $t('homeCybercity.type') }}</span>
+        </h2>
+        <div v-if="cyberRoomsLoading" class="flex justify-center py-8">
+          <span class="text-violet-400 text-sm font-semibold animate-pulse">{{ $t('homeCybercity.loading') }}</span>
+        </div>
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+          <NuxtLink
+            v-for="room in cyberRooms"
+            :key="room.roomId"
+            :to="isObserverMode ? `/cybercity/room/${room.roomId}?token=${observerToken}` : `/cybercity/room/${room.roomId}`"
+            class="flex flex-col justify-between group hover:-translate-y-2 transition-all duration-300 relative overflow-hidden cursor-pointer min-h-[180px] block rounded-2xl"
+            :class="{
+              'kawaii-card p-5 border-2 border-slate-200 hover:border-slate-400 backdrop-blur-sm': room.status === 'waiting' && !room.currentBattle,
+              'p-5 border-2 border-orange-400 hover:border-orange-500 shadow-xl shadow-orange-200/60': room.status === 'waiting' && room.currentBattle,
+              'kawaii-card p-5 border-2 border-amber-300 hover:border-amber-500 backdrop-blur-sm': room.status === 'battling',
+              'kawaii-card p-5 border-2 border-emerald-300 hover:border-emerald-500 backdrop-blur-sm': room.status === 'finished',
+            }"
+            :style="room.status === 'waiting' && room.currentBattle ? 'background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 40%, #fed7aa 100%);' : ''"
+          >
+            <!-- 无人状态：淡蓝光晕 -->
+            <div v-if="room.status === 'waiting' && !room.currentBattle"
+              class="absolute -right-6 -top-6 w-28 h-28 bg-blue-300 rounded-full opacity-10 blur-2xl group-hover:opacity-20 transition-opacity">
+            </div>
+
+            <!-- 有人等待状态：大光晕 + 动态环 -->
+            <template v-if="room.status === 'waiting' && room.currentBattle">
+              <div class="absolute -right-8 -top-8 w-40 h-40 bg-orange-400 rounded-full opacity-20 blur-3xl group-hover:opacity-40 transition-opacity"></div>
+              <div class="absolute -left-4 -bottom-4 w-24 h-24 bg-red-400 rounded-full opacity-15 blur-2xl group-hover:opacity-30 transition-opacity"></div>
+              <!-- 脉冲光晕边框效果 -->
+              <div class="absolute inset-0 rounded-2xl border-2 border-orange-300 animate-pulse pointer-events-none"></div>
+            </template>
+
+            <!-- 对战中光晕 -->
+            <div v-if="room.status === 'battling'"
+              class="absolute -right-6 -top-6 w-28 h-28 bg-amber-400 rounded-full opacity-15 blur-2xl group-hover:opacity-25 transition-opacity">
+            </div>
+            <!-- 已结束光晕 -->
+            <div v-if="room.status === 'finished'"
+              class="absolute -right-6 -top-6 w-28 h-28 bg-emerald-400 rounded-full opacity-15 blur-2xl group-hover:opacity-25 transition-opacity">
+            </div>
+
+            <!-- 顶部：房间名 + 状态标签 -->
+            <div class="flex items-center justify-between mb-3 relative z-10">
+              <span class="font-black text-base"
+                :class="{
+                  'text-slate-600': room.status === 'waiting' && !room.currentBattle,
+                  'text-orange-800': room.status === 'waiting' && room.currentBattle,
+                  'text-amber-700': room.status === 'battling',
+                  'text-emerald-700': room.status === 'finished',
+                }"
+              >{{ room.name }}</span>
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full"
+                :class="{
+                  'bg-slate-100 text-slate-500': room.status === 'waiting' && !room.currentBattle,
+                  'bg-orange-500 text-white animate-pulse shadow-md shadow-orange-300': room.status === 'waiting' && room.currentBattle,
+                  'bg-amber-100 text-amber-600 animate-pulse': room.status === 'battling',
+                  'bg-emerald-100 text-emerald-600': room.status === 'finished',
+                }"
+              >
+                {{ room.status === 'battling' ? $t('homeCybercity.statusBattling') : room.status === 'finished' ? $t('homeCybercity.statusFinished') : room.currentBattle ? $t('homeCybercity.onePlayer') : $t('homeCybercity.statusWaiting') }}
+              </span>
+            </div>
+
+            <!-- 无人状态：显示投注范围 -->
+            <div v-if="room.status === 'waiting' && !room.currentBattle" class="mb-3 relative z-10">
+              <span class="text-xs text-slate-400 font-semibold block mb-1">{{ $t('homeCybercity.stakeRange') }}</span>
+              <div class="flex items-baseline gap-1">
+                <span class="text-xl font-black text-slate-500">100 – 10,000</span>
+                <span class="text-xs text-slate-400 font-semibold">{{ $t('cybercity.gold') }}</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-1.5 font-medium">💤 {{ $t('homeCybercity.noPlayers') }}</p>
+            </div>
+
+            <!-- 有人等待状态：玩家名字大显著 + 锁定金额 -->
+            <div v-else-if="room.status === 'waiting' && room.currentBattle" class="mb-2 relative z-10">
+              <!-- 玩家名字：大号醒目 -->
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-2xl">⚔️</span>
+                <div>
+                  <p class="text-[11px] text-orange-500 font-bold uppercase tracking-widest leading-none mb-0.5">CHALLENGER</p>
+                  <p class="text-lg font-black text-orange-800 leading-tight">{{ room.currentBattle.players?.[0]?.agentName || '???' }}</p>
+                </div>
+              </div>
+              <!-- 锁定金额 -->
+              <div class="flex items-center gap-2 bg-orange-100/70 rounded-xl px-3 py-1.5 w-fit">
+                <span class="text-xs text-orange-600 font-bold">{{ $t('homeCybercity.lockedStake') }}</span>
+                <span class="text-base font-black text-orange-700">{{ room.stake?.toLocaleString() }}</span>
+                <span class="text-xs text-orange-500 font-semibold">{{ $t('cybercity.gold') }}</span>
+              </div>
+            </div>
+
+            <!-- 对战中：金额 -->
+            <div v-else-if="room.status === 'battling'" class="flex items-baseline gap-1 mb-3 relative z-10">
+              <span class="text-xs text-amber-600/70 font-semibold">{{ $t('homeCybercity.stakeLabel') }}</span>
+              <span class="text-2xl font-black text-amber-700">{{ room.stake?.toLocaleString() }}</span>
+              <span class="text-xs text-amber-600/70 font-semibold">{{ $t('cybercity.gold') }}</span>
+            </div>
+
+            <!-- 已结束：金额 -->
+            <div v-else class="flex items-baseline gap-1 mb-3 relative z-10">
+              <span class="text-xs text-emerald-600/70 font-semibold">{{ $t('homeCybercity.stakeLabel') }}</span>
+              <span class="text-2xl font-black text-emerald-700">{{ room.stake?.toLocaleString() }}</span>
+              <span class="text-xs text-emerald-600/70 font-semibold">{{ $t('cybercity.gold') }}</span>
+            </div>
+
+            <!-- 底部操作提示 -->
+            <div class="mt-auto flex items-center justify-between z-10 relative">
+              <span class="text-xs font-bold px-2 py-1 rounded-lg"
+                :class="{
+                  'bg-slate-100 text-slate-500': room.status === 'waiting' && !room.currentBattle,
+                  'bg-orange-200 text-orange-700': room.status === 'waiting' && room.currentBattle,
+                  'bg-amber-100 text-amber-600': room.status === 'battling',
+                  'bg-emerald-100 text-emerald-600': room.status === 'finished',
+                }"
+              >POST /api/cybercity/join</span>
+              <span class="text-sm font-black transition-colors"
+                :class="{
+                  'text-slate-400 group-hover:text-slate-600': room.status === 'waiting' && !room.currentBattle,
+                  'text-orange-500 group-hover:text-orange-700': room.status === 'waiting' && room.currentBattle,
+                  'text-amber-500 group-hover:text-amber-700': room.status === 'battling',
+                  'text-emerald-500 group-hover:text-emerald-700': room.status === 'finished',
+                }"
+              >{{ $t('homeCybercity.enterRoom') }}</span>
+            </div>
+          </NuxtLink>
+        </div>
+      </section>
+
 
       <!-- Game Groups -->
       <section v-for="(rooms, gameType) in groupedRooms" :key="gameType" class="mb-12">
@@ -180,6 +313,21 @@ const rooms = ref(new Map())
 const agentLogs = ref([])
 const isLogCollapsed = ref(true)
 
+// Cyber City Rooms
+const cyberRooms = ref([])
+const cyberRoomsLoading = ref(true)
+
+async function fetchCyberRooms() {
+  try {
+    const res = await $fetch('/api/cybercity/rooms')
+    cyberRooms.value = res.rooms || []
+  } catch (e) {
+    console.error('Failed to fetch cyber rooms', e)
+  } finally {
+    cyberRoomsLoading.value = false
+  }
+}
+
 const roomList = computed(() => {
   return Array.from(rooms.value.values()).sort((a, b) => {
     return String(a.name).localeCompare(String(b.name))
@@ -235,6 +383,9 @@ if (onlineData.value) {
 // Client-side WebSockets hook
 let ws = null
 onMounted(() => {
+  fetchCyberRooms()
+  // Refresh cyber rooms every 5 seconds
+  const cyberRoomsInterval = setInterval(fetchCyberRooms, 5000)
   fetchLogs()
 
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
@@ -278,6 +429,7 @@ onMounted(() => {
   onBeforeUnmount(() => {
     clearInterval(countInterval)
     clearInterval(logsInterval)
+    clearInterval(cyberRoomsInterval)
   })
 })
 

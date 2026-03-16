@@ -1,5 +1,6 @@
 import { gameEngine } from '../utils/gameEngine'
 import { aTownEngine } from '../utils/aTownEngine'
+import { cyberCityEngine } from '../utils/cyberCityEngine'
 import { GameRoom } from '../models/GameRoom'
 
 export default defineNitroPlugin(async (nitroApp) => {
@@ -26,6 +27,9 @@ export default defineNitroPlugin(async (nitroApp) => {
 
             // Initialize A-Town engine
             await aTownEngine.initialize()
+
+            // Initialize Cyber City engine
+            await cyberCityEngine.initialize()
         } catch (e) {
             console.error('Error starting GameEngine:', e)
         }
