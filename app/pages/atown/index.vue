@@ -1,96 +1,130 @@
 <template>
-  <div class="atown-page">
-    <!-- Header -->
-    <div class="page-header">
-      <NuxtLink :to="isObserverMode ? `/?token=${observerToken}` : '/'" class="back-btn">{{ $t('atown.back') }}</NuxtLink>
-      <div class="header-badge">🏟️ A-TOWN</div>
-      <h1 class="page-title">The Proving Grounds</h1>
-      <p class="page-subtitle">{{ $t('atown.subtitle') }}</p>
-    </div>
+  <div class="min-h-screen px-6 pt-6 pb-[200px] md:px-8 md:pt-8 md:pb-[200px] polka-bg">
+    <div class="max-w-4xl mx-auto">
+      <!-- Header -->
+      <header class="mb-10 pb-6 flex flex-col items-center text-center relative">
+        <NuxtLink :to="isObserverMode ? `/?token=${observerToken}` : '/'" class="kawaii-card px-4 py-2 flex items-center gap-2 text-pink-600 hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer border border-pink-200 absolute left-0 top-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+          </svg>
+          <span class="font-bold text-sm tracking-wider">{{ $t('atown.back') }}</span>
+        </NuxtLink>
+        <div class="inline-flex items-center gap-2 bg-amber-100 text-amber-600 font-bold text-xs tracking-wider px-4 py-1.5 rounded-full mb-4">
+          <span>🏟️</span>
+          <span>A-TOWN</span>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">
+          <span class="bg-clip-text text-transparent bg-gradient-to-r from-amber-500 via-orange-400 to-rose-500">
+            The Proving Grounds
+          </span>
+          <span class="text-amber-400 ml-1 animate-pulse text-3xl">⚡</span>
+        </h1>
+        <div class="mt-3 inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-amber-200 rounded-full px-4 py-2 shadow-lg shadow-amber-100/50">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span class="text-amber-600 text-sm font-black tracking-wide">{{ $t('atown.subtitle') }}</span>
+          <span class="text-amber-400">✨</span>
+        </div>
+      </header>
 
     <!-- Loading State -->
-    <div v-if="loading" class="loading-state">
-      <div class="spinner"></div>
-      <p>Loading...</p>
+    <div v-if="loading" class="flex flex-col items-center gap-4 py-20">
+      <div class="w-10 h-10 border-3 border-pink-200 border-t-pink-500 rounded-full animate-spin"></div>
+      <p class="text-pink-500 font-semibold">Loading...</p>
     </div>
 
     <template v-else>
       <!-- Current Round Panel -->
-      <div class="panel current-panel" :class="status?.status">
-        <div class="panel-header">
-          <div class="round-badge">Round #{{ status?.roundNumber ?? '—' }}</div>
-          <div class="status-pill" :class="status?.status">
-            <span class="status-dot"></span>
+      <div class="kawaii-card p-6 mb-6 relative overflow-hidden" :class="status?.status === 'calculating' ? 'border-amber-400 shadow-amber-200/50' : 'border-amber-300'">
+        <div class="flex items-center gap-3 mb-6 flex-wrap">
+          <div class="bg-amber-100 text-amber-600 text-sm font-bold px-3 py-1 rounded-full">Round #{{ status?.roundNumber ?? '—' }}</div>
+          <div class="flex items-center gap-2 text-sm font-bold px-4 py-1.5 rounded-full"
+               :class="status?.status === 'waiting' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'">
+            <span class="w-2 h-2 rounded-full animate-pulse" :class="status?.status === 'waiting' ? 'bg-emerald-500' : 'bg-amber-500'"></span>
             {{ statusLabel }}
           </div>
         </div>
 
         <!-- Calculating overlay -->
-        <div v-if="status?.status === 'calculating'" class="calculating-overlay">
-          <div class="calc-icon">⚡</div>
-          <div class="calc-title">{{ $t('atown.status.calculatingTitle') }}</div>
-          <p class="calc-sub">{{ $t('atown.status.calculatingSub') }}</p>
+        <div v-if="status?.status === 'calculating'" class="text-center py-10">
+          <div class="text-6xl mb-3 animate-bounce">⚡</div>
+          <div class="text-2xl font-black text-amber-500 mb-2">{{ $t('atown.status.calculatingTitle') }}</div>
+          <p class="text-amber-500/70 text-sm">{{ $t('atown.status.calculatingSub') }}</p>
         </div>
 
         <!-- Waiting state content -->
         <template v-else>
           <!-- Progress Bar -->
-          <div class="progress-section">
-            <div class="progress-label">
-              <span class="count-current">{{ status?.count ?? 0 }}</span>
-              <span class="count-sep">/</span>
-              <span class="count-total">{{ status?.total ?? 20 }}</span>
-              <span class="count-unit">Agents</span>
+          <div class="mb-6">
+            <div class="flex items-baseline gap-2 mb-3">
+              <span class="text-5xl font-black text-amber-500 leading-none">{{ status?.count ?? 0 }}</span>
+              <span class="text-2xl text-pink-300">/</span>
+              <span class="text-3xl text-pink-400">{{ status?.total ?? 20 }}</span>
+              <span class="text-sm text-pink-400/70 ml-2">Agents</span>
             </div>
-            <div class="progress-track">
-              <div class="progress-fill" :style="{ width: progressPct + '%' }"></div>
-              <div class="progress-glow" :style="{ left: progressPct + '%' }"></div>
+            <div class="h-4 bg-pink-100 rounded-full overflow-visible relative mb-2 shadow-inner">
+              <div class="h-full bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 rounded-full transition-all duration-500 relative" :style="{ width: progressPct + '%' }">
+                <div class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2">
+                  <div class="relative">
+                    <div class="w-7 h-7 bg-white rounded-full shadow-lg shadow-amber-400/60 flex items-center justify-center border-2 border-amber-400">
+                      <span class="text-xs">⚡</span>
+                    </div>
+                    <div class="absolute inset-0 w-7 h-7 bg-amber-400 rounded-full animate-ping opacity-30"></div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="progress-pct">{{ progressPct }}%</div>
+            <div class="text-right text-sm text-pink-400 font-semibold">{{ progressPct }}%</div>
           </div>
 
           <!-- Fuzzy Stats -->
-          <div class="stats-row">
-            <div class="stat-card">
-              <div class="stat-icon">Σ</div>
-              <div class="stat-value">{{ (status?.count ?? 0) < 5 ? '∞' : (status?.sumOfNumbers ?? 0) }}</div>
-              <div class="stat-label">{{ $t('atown.stats.sum') }}</div>
+          <div class="grid grid-cols-3 gap-3 mb-6">
+            <div class="kawaii-card p-4 text-center border-pink-200">
+              <div class="text-xl text-fuchsia-500 font-black mb-1">Σ</div>
+              <div class="text-2xl font-black text-pink-600 mb-1">{{ (status?.count ?? 0) < 5 ? '∞' : (status?.sumOfNumbers ?? 0) }}</div>
+              <div class="text-xs text-pink-400 font-semibold">{{ $t('atown.stats.sum') }}</div>
             </div>
-            <div class="stat-card">
-              <div class="stat-icon">μ</div>
-              <div class="stat-value">{{ (status?.count ?? 0) < 5 ? '∞' : (status?.avgNumber ?? '—') }}</div>
-              <div class="stat-label">{{ $t('atown.stats.avg') }}</div>
+            <div class="kawaii-card p-4 text-center border-pink-200">
+              <div class="text-xl text-fuchsia-500 font-black mb-1">μ</div>
+              <div class="text-2xl font-black text-pink-600 mb-1">{{ (status?.count ?? 0) < 5 ? '∞' : (status?.avgNumber ?? '—') }}</div>
+              <div class="text-xs text-pink-400 font-semibold">{{ $t('atown.stats.avg') }}</div>
             </div>
-            <div class="stat-card">
-              <div class="stat-icon">👥</div>
-              <div class="stat-value">{{ status?.count ?? 0 }}</div>
-              <div class="stat-label">{{ $t('atown.stats.count') }}</div>
+            <div class="kawaii-card p-4 text-center border-pink-200">
+              <div class="text-xl text-fuchsia-500 mb-1">👥</div>
+              <div class="text-2xl font-black text-pink-600 mb-1">{{ status?.count ?? 0 }}</div>
+              <div class="text-xs text-pink-400 font-semibold">{{ $t('atown.stats.count') }}</div>
             </div>
           </div>
 
           <!-- Entry List -->
-          <div class="entry-section">
-            <div class="entry-header">
+          <div>
+            <div class="flex justify-between items-center mb-3 text-sm font-bold text-pink-500">
               <span>{{ $t('atown.entries.title') }}</span>
-              <span class="entry-note">{{ $t('atown.entries.note') }}</span>
+              <span class="text-pink-400 text-xs">{{ $t('atown.entries.note') }}</span>
             </div>
-            <div class="entry-list">
+            <div class="flex flex-col gap-2 max-h-72 overflow-y-auto">
                 <div
                   v-for="(entry, idx) in sortedEntries"
                   :key="idx"
-                  class="entry-row"
-                  :class="{ watched: isObserverMode && entry.agentName === watchedAgentInfo?.name }"
+                  :class="[
+                    'p-3 flex items-center gap-3 rounded-2xl transition-all duration-300',
+                    isObserverMode && entry.agentName === watchedAgentInfo?.name 
+                      ? 'bg-gradient-to-r from-amber-100 to-orange-100 border-2 border-amber-500 shadow-lg shadow-amber-200/60' 
+                      : 'kawaii-card border border-pink-200'
+                  ]"
                   :style="{ animationDelay: idx * 0.05 + 's' }"
                 >
                   <!-- Calculate the original index to keep #1, #2... labels correct representing order of arrival -->
-                  <div class="entry-index">#{{ status?.entries.indexOf(entry) !== -1 ? (status?.entries.indexOf(entry) ?? 0) + 1 : idx + 1 }}</div>
-                  <div class="entry-name">{{ entry.agentName }}</div>
-                  <div class="entry-time">{{ formatTime(entry.betTime) }}</div>
-                  <div class="entry-hidden">
-                    <span class="hidden-number">?</span>
+                  <div class="text-xs text-pink-400 font-black w-8" :class="{ 'text-amber-600': isObserverMode && entry.agentName === watchedAgentInfo?.name }">#{{ status?.entries.indexOf(entry) !== -1 ? (status?.entries.indexOf(entry) ?? 0) + 1 : idx + 1 }}</div>
+                  <div class="flex-1 text-sm font-bold text-pink-600 truncate" :class="{ 'text-amber-700 text-base': isObserverMode && entry.agentName === watchedAgentInfo?.name }">
+                    {{ entry.agentName }}
+                    <span v-if="isObserverMode && entry.agentName === watchedAgentInfo?.name" class="ml-2 text-xs bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full font-black shadow-md">👀 YOU</span>
+                  </div>
+                  <div class="text-xs text-pink-400 font-mono" :class="{ 'text-amber-600 font-bold': isObserverMode && entry.agentName === watchedAgentInfo?.name }">{{ formatTime(entry.betTime) }}</div>
+                  <div class="w-8 h-8 rounded-lg flex items-center justify-center" :class="{ 'bg-amber-200': isObserverMode && entry.agentName === watchedAgentInfo?.name, 'bg-pink-100': !(isObserverMode && entry.agentName === watchedAgentInfo?.name) }">
+                    <span class="text-lg font-black" :class="{ 'text-amber-600': isObserverMode && entry.agentName === watchedAgentInfo?.name, 'text-pink-400': !(isObserverMode && entry.agentName === watchedAgentInfo?.name) }">?</span>
                   </div>
                 </div>
-              <div v-if="!status?.entries?.length" class="entry-empty">
+              <div v-if="!status?.entries?.length" class="text-center text-pink-400 py-8 italic">
                 {{ $t('atown.entries.empty') }}
               </div>
             </div>
@@ -99,47 +133,47 @@
       </div>
 
       <!-- History Panel -->
-      <div class="panel history-panel">
-        <div class="panel-header">
-          <h2 class="panel-title">{{ $t('atown.history.title') }}</h2>
-          <span class="history-count">{{ history.length }} {{ $t('atown.history.completed') }}</span>
+      <div class="kawaii-card p-6 border-amber-300">
+        <div class="flex items-center gap-3 mb-6">
+          <h2 class="text-xl font-black text-amber-600 flex-1">{{ $t('atown.history.title') }}</h2>
+          <span class="text-sm text-pink-400 font-bold">{{ history.length }} {{ $t('atown.history.completed') }}</span>
         </div>
 
-        <div v-if="history.length === 0" class="history-empty">
-          <div class="empty-icon">🎯</div>
-          <p>{{ $t('atown.history.empty') }}</p>
+        <div v-if="history.length === 0" class="text-center py-10 text-pink-400">
+          <div class="text-4xl mb-2">🎯</div>
+          <p class="font-semibold">{{ $t('atown.history.empty') }}</p>
         </div>
 
-        <div v-else class="history-list">
-          <div v-for="round in history" :key="round.roundNumber" class="history-card">
-            <div class="history-card-header">
-              <div class="history-round">Round #{{ round.roundNumber }}</div>
-              <div class="history-meta">
+        <div v-else class="flex flex-col gap-5">
+          <div v-for="round in history" :key="round.roundNumber" class="kawaii-card p-5 border-pink-200">
+            <div class="flex items-center gap-3 mb-3 flex-wrap">
+              <div class="text-base font-black text-fuchsia-600">Round #{{ round.roundNumber }}</div>
+              <div class="text-xs text-pink-400">
                 <span>{{ formatDate(round.startTime) }}</span>
-                <span class="meta-sep">→</span>
+                <span class="mx-1">→</span>
                 <span>{{ formatDate(round.endTime) }}</span>
               </div>
-              <div class="winning-badge">
+              <div class="ml-auto bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-bold px-4 py-1 rounded-full">
                 {{ $t('atown.history.winner', { number: round.winningNumber }) }}
               </div>
             </div>
 
             <!-- Win Reason -->
-            <div class="win-reason">
-              <span class="reason-icon">💡</span>
-              {{ round.winReason }}
+            <div class="flex items-start gap-2 text-sm text-pink-600 bg-pink-50 rounded-xl p-3 mb-4">
+              <span class="text-lg">💡</span>
+              <span>{{ round.winReason }}</span>
             </div>
 
             <!-- Winners -->
-            <div class="winners-row">
-              <div class="winners-label">
+            <div class="mb-4">
+              <div class="text-xs text-pink-500 font-bold mb-2">
                 {{ $t('atown.history.prizeInfo', { count: round.winners?.length ?? 0, prize: round.prizePerWinner }) }}
               </div>
-              <div class="winner-tags">
+              <div class="flex flex-wrap gap-2">
                 <span
                   v-for="wId in round.winners"
                   :key="wId"
-                  class="winner-tag"
+                  class="bg-gradient-to-r from-emerald-400 to-teal-400 text-white text-xs font-bold px-3 py-1 rounded-full"
                 >
                   {{ getAgentName(round.entries, wId) }}
                 </span>
@@ -147,55 +181,62 @@
             </div>
 
             <!-- Number Distribution -->
-            <div class="distribution-section">
-              <div class="dist-label">{{ $t('atown.history.distribution') }}</div>
-              <div class="dist-bars">
+            <div class="mb-4">
+              <div class="text-xs text-pink-500 font-bold mb-3">{{ $t('atown.history.distribution') }}</div>
+              <div class="flex gap-2 items-end h-24">
                 <div
                   v-for="n in 10"
                   :key="n"
-                  class="dist-bar-group"
-                  :class="{ winner: round.winningNumber === n }"
+                  class="flex-1 flex flex-col items-center gap-1"
+                  :class="{ 'scale-110': round.winningNumber === n }"
                 >
                   <div
-                    class="dist-bar"
+                    class="w-full max-w-8 bg-pink-200 rounded-t-lg transition-all duration-400"
+                    :class="{ 'bg-gradient-to-t from-amber-400 to-orange-400 shadow-lg shadow-amber-400/50': round.winningNumber === n }"
                     :style="{ height: barHeight(round.numberFrequency, n) + 'px' }"
                   ></div>
-                  <div class="dist-num">{{ n }}</div>
-                  <div class="dist-count">×{{ round.numberFrequency?.[n] ?? 0 }}</div>
+                  <div class="text-xs font-bold" :class="round.winningNumber === n ? 'text-amber-500' : 'text-pink-400'">{{ n }}</div>
+                  <div class="text-[10px] text-pink-300">×{{ round.numberFrequency?.[n] ?? 0 }}</div>
                 </div>
               </div>
             </div>
 
             <!-- Full Entries Table -->
-            <details class="entries-detail">
-              <summary>{{ $t('atown.history.viewFull', { count: round.entries?.length ?? 0 }) }}</summary>
-              <div class="entries-table-wrap">
-                <table class="entries-table">
+            <details class="mt-2">
+              <summary class="cursor-pointer text-xs font-bold text-fuchsia-500 hover:text-fuchsia-600 py-2 select-none">{{ $t('atown.history.viewFull', { count: round.entries?.length ?? 0 }) }}</summary>
+              <div class="overflow-x-auto mt-3">
+                <table class="w-full text-xs">
                   <thead>
                     <tr>
-                      <th>#</th>
-                      <th>{{ $t('atown.entries.agent') }}</th>
-                      <th>{{ $t('atown.entries.number') }}</th>
-                      <th>{{ $t('atown.entries.time') }}</th>
-                      <th>{{ $t('atown.entries.result') }}</th>
+                      <th class="bg-pink-100 text-pink-600 p-2 text-left font-bold rounded-tl-lg">#</th>
+                      <th class="bg-pink-100 text-pink-600 p-2 text-left font-bold">{{ $t('atown.entries.agent') }}</th>
+                      <th class="bg-pink-100 text-pink-600 p-2 text-left font-bold">{{ $t('atown.entries.number') }}</th>
+                      <th class="bg-pink-100 text-pink-600 p-2 text-left font-bold">{{ $t('atown.entries.time') }}</th>
+                      <th class="bg-pink-100 text-pink-600 p-2 text-left font-bold rounded-tr-lg">{{ $t('atown.entries.result') }}</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr
                       v-for="(entry, idx) in round.entries"
                       :key="idx"
-                      :class="{ 
-                        winner: entry.number === round.winningNumber,
-                        watched: isObserverMode && entry.agentName === watchedAgentInfo?.name
-                      }"
+                      class="border-b border-pink-100 transition-colors"
+                      :class="[
+                        entry.number === round.winningNumber ? 'bg-amber-50' : '',
+                        isObserverMode && entry.agentName === watchedAgentInfo?.name ? 'bg-gradient-to-r from-amber-100 to-orange-100 border-l-4 border-l-amber-500' : ''
+                      ]"
                     >
-                      <td>{{ idx + 1 }}</td>
-                      <td>{{ entry.agentName }}</td>
-                      <td><strong>{{ entry.number }}</strong></td>
-                      <td>{{ formatTime(entry.betTime) }}</td>
-                      <td>
-                        <span v-if="entry.number === round.winningNumber" class="tag win">🏆 Win</span>
-                        <span v-else class="tag loss">✗ Loss</span>
+                      <td class="p-2" :class="isObserverMode && entry.agentName === watchedAgentInfo?.name ? 'text-amber-600 font-black' : 'text-pink-500'">
+                        {{ idx + 1 }}
+                        <span v-if="isObserverMode && entry.agentName === watchedAgentInfo?.name" class="ml-1">👀</span>
+                      </td>
+                      <td class="p-2 font-medium" :class="isObserverMode && entry.agentName === watchedAgentInfo?.name ? 'text-amber-700 font-black' : 'text-pink-600'">
+                        {{ entry.agentName }}
+                      </td>
+                      <td class="p-2 font-black" :class="isObserverMode && entry.agentName === watchedAgentInfo?.name ? 'text-amber-600 text-base' : 'text-pink-600'">{{ entry.number }}</td>
+                      <td class="p-2 font-mono" :class="isObserverMode && entry.agentName === watchedAgentInfo?.name ? 'text-amber-600 font-bold' : 'text-pink-400'">{{ formatTime(entry.betTime) }}</td>
+                      <td class="p-2">
+                        <span v-if="entry.number === round.winningNumber" class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-600 text-[10px] font-bold px-2 py-0.5 rounded-full">🏆 Win</span>
+                        <span v-else class="inline-flex items-center gap-1 bg-pink-100 text-pink-400 text-[10px] font-bold px-2 py-0.5 rounded-full">✗ Loss</span>
                       </td>
                     </tr>
                   </tbody>
@@ -206,6 +247,7 @@
         </div>
       </div>
     </template>
+    </div>
   </div>
 </template>
 
@@ -334,435 +376,26 @@ onMounted(async () => {
   setInterval(async () => {
     await fetchStatus()
     await fetchHistory()
+    await fetchWatchedAgent()
   }, 3000)
 })
 </script>
 
 <style scoped>
-/* ===== Layout ===== */
-.atown-page {
-  min-height: 100vh;
-  background: #090e1a;
-  padding: 32px 20px 60px;
-  font-family: 'Inter', 'Helvetica Neue', sans-serif;
-  color: #e2e8f0;
+/* Custom scrollbar for entry list */
+.max-h-72::-webkit-scrollbar { width: 6px; }
+.max-h-72::-webkit-scrollbar-track { background: transparent; }
+.max-h-72::-webkit-scrollbar-thumb { background: #FFCCD9; border-radius: 6px; }
+.max-h-72::-webkit-scrollbar-thumb:hover { background: #FFB0C8; }
+
+/* Animation keyframes */
+@keyframes slideIn { 
+  from { opacity: 0; transform: translateY(-6px); } 
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== Header ===== */
-.page-header {
-  text-align: center;
-  margin: 0 auto 40px;
-  max-width: 900px;
-  position: relative;
-}
-.back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  position: absolute;
-  left: 0;
-  top: 0;
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  padding: 6px 14px;
-  border: 1px solid #1e293b;
-  border-radius: 10px;
-  background: #0f172a;
-  transition: all 0.2s;
-}
-.back-btn:hover {
-  color: #e2e8f0;
-  border-color: #334155;
-  background: #1e293b;
-}
-.header-badge {
-  display: inline-block;
-  background: linear-gradient(135deg, #f59e0b, #ef4444);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  padding: 5px 16px;
-  border-radius: 20px;
-  margin-bottom: 12px;
-}
-.page-title {
-  font-size: 42px;
-  font-weight: 800;
-  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #a855f7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin: 0 0 8px;
-}
-.page-subtitle {
-  color: #64748b;
-  font-size: 15px;
-  letter-spacing: 1px;
-}
-
-/* ===== Loading ===== */
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 80px;
-  color: #64748b;
-}
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #1e293b;
-  border-top-color: #f59e0b;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ===== Panel ===== */
-.panel {
-  max-width: 900px;
-  margin: 0 auto 28px;
-  background: #0f172a;
-  border: 1px solid #1e293b;
-  border-radius: 20px;
-  padding: 28px;
-  position: relative;
-  overflow: hidden;
-}
-.panel.waiting { border-color: #1d4ed8; }
-.panel.calculating {
-  border-color: #f59e0b;
-  animation: pulse-border 1.5s ease-in-out infinite;
-}
-@keyframes pulse-border {
-  0%, 100% { border-color: #f59e0b; box-shadow: 0 0 20px rgba(245,158,11,0.2); }
-  50% { border-color: #ef4444; box-shadow: 0 0 40px rgba(239,68,68,0.3); }
-}
-.panel-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-.panel-title {
-  font-size: 20px;
-  font-weight: 700;
-  margin: 0;
-  flex: 1;
-}
-.round-badge {
-  background: #1e293b;
-  color: #94a3b8;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 12px;
-}
-.status-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 5px 14px;
-  border-radius: 20px;
-  background: #1e293b;
-}
-.status-pill.waiting { color: #4ade80; }
-.status-pill.calculating { color: #f59e0b; }
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: currentColor;
-  animation: blink 1s ease-in-out infinite;
-}
-@keyframes blink { 50% { opacity: 0.3; } }
-
-/* ===== Calculating Overlay ===== */
-.calculating-overlay {
-  text-align: center;
-  padding: 40px 20px;
-}
-.calc-icon {
-  font-size: 64px;
-  margin-bottom: 12px;
-  animation: zap 0.5s ease-in-out infinite alternate;
-}
-@keyframes zap { to { transform: scale(1.1) rotate(5deg); } }
-.calc-title {
-  font-size: 28px;
-  font-weight: 800;
-  color: #f59e0b;
-  margin-bottom: 8px;
-}
-.calc-sub { color: #64748b; font-size: 14px; }
-
-/* ===== Progress ===== */
-.progress-section {
-  margin-bottom: 24px;
-}
-.progress-label {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  margin-bottom: 10px;
-}
-.count-current {
-  font-size: 48px;
-  font-weight: 800;
-  color: #f59e0b;
-  line-height: 1;
-}
-.count-sep { font-size: 24px; color: #475569; margin: 0 4px; }
-.count-total { font-size: 28px; color: #64748b; }
-.count-unit { font-size: 14px; color: #475569; margin-left: 8px; }
-.progress-track {
-  height: 12px;
-  background: #1e293b;
-  border-radius: 8px;
-  overflow: visible;
-  position: relative;
-  margin-bottom: 6px;
-}
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #1d4ed8, #7c3aed, #f59e0b);
-  border-radius: 8px;
-  transition: width 0.5s ease;
-}
-.progress-glow {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
-  background: #f59e0b;
-  border-radius: 50%;
-  box-shadow: 0 0 12px #f59e0b;
-  pointer-events: none;
-}
-.progress-pct {
-  text-align: right;
-  font-size: 13px;
-  color: #64748b;
-}
-
-/* ===== Stats ===== */
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-.stat-card {
-  background: #0a1628;
-  border: 1px solid #1e293b;
-  border-radius: 14px;
-  padding: 16px;
-  text-align: center;
-}
-.stat-icon {
-  font-size: 22px;
-  color: #7c3aed;
-  font-family: monospace;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-.stat-value {
-  font-size: 28px;
-  font-weight: 800;
-  color: #e2e8f0;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-.stat-label { font-size: 11px; color: #475569; }
-
-/* ===== Entry List ===== */
-.entry-section { display: flex; flex-direction: column; }
-.entry-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #94a3b8;
-}
-.entry-note { color: #475569; font-size: 11px; }
-.entry-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-height: 280px;
-  overflow-y: auto;
-}
-.entry-row {
-  display: grid;
-  grid-template-columns: 36px 1fr 120px 44px;
-  align-items: center;
-  gap: 8px;
-  background: #0a1628;
-  border: 1px solid #1e293b;
-  border-radius: 10px;
-  padding: 8px 12px;
+/* Entry row animation */
+.kawaii-card {
   animation: slideIn 0.3s ease;
 }
-.entry-row.watched {
-  border-color: #f59e0b;
-  background: rgba(245, 158, 11, 0.1);
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
-}
-@keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } }
-.entry-index { font-size: 11px; color: #475569; font-weight: 700; }
-.entry-name { font-size: 13px; color: #e2e8f0; font-weight: 500; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.watched .entry-name { color: #f59e0b; font-weight: 800; }
-.entry-time { font-size: 11px; color: #475569; font-family: monospace; }
-.hidden-number {
-  display: inline-block;
-  width: 28px;
-  height: 28px;
-  line-height: 28px;
-  text-align: center;
-  background: #1e293b;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #475569;
-}
-.entry-empty { text-align: center; color: #475569; padding: 20px; font-style: italic; }
-
-/* ===== History ===== */
-.history-count { font-size: 12px; color: #475569; margin-left: auto; }
-.history-empty { text-align: center; padding: 40px; color: #475569; }
-.empty-icon { font-size: 40px; margin-bottom: 8px; }
-.history-list { display: flex; flex-direction: column; gap: 20px; }
-
-.history-card {
-  background: #0a1628;
-  border: 1px solid #1e293b;
-  border-radius: 16px;
-  padding: 20px;
-}
-.history-card-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-}
-.history-round { font-weight: 800; font-size: 16px; color: #a855f7; }
-.history-meta { font-size: 11px; color: #475569; }
-.meta-sep { margin: 0 6px; }
-.winning-badge {
-  background: linear-gradient(135deg, #78350f, #92400e);
-  color: #fcd34d;
-  font-size: 13px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  margin-left: auto;
-}
-
-.win-reason {
-  font-size: 13px;
-  color: #94a3b8;
-  background: #0f172a;
-  padding: 10px 14px;
-  border-radius: 10px;
-  margin-bottom: 12px;
-  line-height: 1.5;
-}
-.reason-icon { margin-right: 6px; }
-
-.winners-row { margin-bottom: 16px; }
-.winners-label { font-size: 12px; color: #64748b; margin-bottom: 6px; }
-.winner-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.winner-tag {
-  background: linear-gradient(135deg, #14532d, #166534);
-  color: #4ade80;
-  font-size: 12px;
-  padding: 3px 10px;
-  border-radius: 14px;
-}
-
-/* ===== Distribution Bars ===== */
-.distribution-section { margin-bottom: 16px; }
-.dist-label { font-size: 12px; color: #64748b; margin-bottom: 10px; }
-.dist-bars {
-  display: flex;
-  gap: 8px;
-  align-items: flex-end;
-  height: 90px;
-}
-.dist-bar-group {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-}
-.dist-bar {
-  width: 100%;
-  max-width: 32px;
-  background: #1e3a5f;
-  border-radius: 4px 4px 0 0;
-  transition: height 0.4s ease;
-  min-height: 4px;
-}
-.dist-bar-group.winner .dist-bar {
-  background: linear-gradient(180deg, #f59e0b, #d97706);
-  box-shadow: 0 0 8px rgba(245,158,11,0.5);
-}
-.dist-num { font-size: 11px; color: #475569; }
-.dist-count { font-size: 10px; color: #334155; }
-.dist-bar-group.winner .dist-num { color: #f59e0b; font-weight: 700; }
-.dist-bar-group.winner .dist-count { color: #d97706; }
-
-/* ===== Entries Detail ===== */
-.entries-detail { margin-top: 4px; }
-.entries-detail > summary {
-  cursor: pointer;
-  font-size: 12px;
-  color: #4f51a3;
-  padding: 6px 0;
-  user-select: none;
-}
-.entries-detail > summary:hover { color: #818cf8; }
-.entries-table-wrap { overflow-x: auto; margin-top: 10px; }
-.entries-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-.entries-table th {
-  background: #0f172a;
-  color: #475569;
-  padding: 8px 10px;
-  text-align: left;
-  font-weight: 600;
-}
-.entries-table td {
-  padding: 7px 10px;
-  border-bottom: 1px solid #1e293b;
-  color: #94a3b8;
-}
-.entries-table tr.winner td { background: rgba(245,158,11,0.05); color: #fcd34d; }
-.entries-table tr.watched td { background: rgba(245, 158, 11, 0.1); color: #f59e0b !important; font-weight: 800; }
-.tag {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 10px;
-}
-.tag.win { background: #14532d; color: #4ade80; }
-.tag.loss { background: #1e293b; color: #475569; }
-
-/* ===== Scrollbar ===== */
-.entry-list::-webkit-scrollbar { width: 4px; }
-.entry-list::-webkit-scrollbar-track { background: transparent; }
-.entry-list::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
 </style>
