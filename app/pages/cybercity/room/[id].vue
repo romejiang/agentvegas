@@ -66,13 +66,26 @@
               <div v-else-if="room.status === 'waiting' && room.currentBattle" class="flex flex-col items-center gap-4">
                 <div class="text-6xl animate-bounce">⚔️</div>
                 <h3 class="text-xl font-black text-orange-500">{{ $t('cybercity.waitingOpponent') }}</h3>
-                <div class="flex items-center gap-3 px-5 py-3 bg-orange-50 border-2 border-orange-200 rounded-2xl shadow-md shadow-orange-100">
+                <div class="relative flex items-center gap-3 px-5 py-3 rounded-2xl shadow-md transition-all duration-300"
+                  :class="[
+                    'bg-orange-50 border-2',
+                    isObserverMode && room.currentBattle.players?.[0]?.agentName === watchedAgentInfo?.name
+                      ? 'border-orange-500 shadow-xl shadow-orange-300/50 bg-gradient-to-r from-orange-100 to-amber-100 scale-105'
+                      : 'border-orange-200 shadow-orange-100'
+                  ]">
                   <span class="text-2xl">👑</span>
                   <div class="flex flex-col items-start">
-                    <span class="text-[10px] font-black text-orange-400 uppercase tracking-widest leading-none mb-0.5">HOST</span>
-                    <span class="font-black text-orange-800 text-lg leading-tight">{{ room.currentBattle.players?.[0]?.agentName }}</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest leading-none mb-0.5"
+                      :class="isObserverMode && room.currentBattle.players?.[0]?.agentName === watchedAgentInfo?.name ? 'text-orange-600' : 'text-orange-400'">HOST</span>
+                    <span class="font-black text-lg leading-tight"
+                      :class="isObserverMode && room.currentBattle.players?.[0]?.agentName === watchedAgentInfo?.name ? 'text-orange-800' : 'text-orange-800'">{{ room.currentBattle.players?.[0]?.agentName }}</span>
                   </div>
-                  <span class="text-xs font-bold px-2 py-0.5 bg-orange-100 text-orange-600 rounded-full border border-orange-200">{{ $t('cybercity.joined') }}</span>
+                  <span class="text-xs font-bold px-2 py-0.5 rounded-full border"
+                    :class="isObserverMode && room.currentBattle.players?.[0]?.agentName === watchedAgentInfo?.name
+                      ? 'bg-orange-500 text-white border-orange-400 shadow-sm'
+                      : 'bg-orange-100 text-orange-600 border-orange-200'">{{ $t('cybercity.joined') }}</span>
+                  <span v-if="isObserverMode && room.currentBattle.players?.[0]?.agentName === watchedAgentInfo?.name"
+                    class="absolute -right-3 -top-2 text-xs bg-gradient-to-r from-amber-500 to-orange-500 text-white px-2 py-0.5 rounded-full font-black shadow-lg border-2 border-white">👀 YOU</span>
                 </div>
                 <p class="text-orange-500/80 text-xs font-semibold max-w-xs">{{ $t('cybercity.waitingHint') }}</p>
               </div>
@@ -82,14 +95,36 @@
                 <div class="text-6xl" style="animation: shake 0.4s infinite">⚔️</div>
                 <h3 class="text-xl font-black text-amber-500">{{ $t('cybercity.battleInProgress') }}</h3>
                 <div class="flex items-center gap-4">
-                  <div class="flex flex-col items-center gap-2 px-6 py-4 bg-pink-50 border border-pink-200 rounded-2xl min-w-[110px]">
+                  <div class="relative flex flex-col items-center gap-2 px-6 py-4 rounded-2xl min-w-[110px] transition-all duration-300"
+                    :class="[
+                      'bg-pink-50 border-2',
+                      isObserverMode && room.currentBattle?.players?.[0]?.agentName === watchedAgentInfo?.name
+                        ? 'border-orange-500 shadow-xl shadow-orange-300/50 bg-gradient-to-b from-orange-50 to-amber-50 scale-105'
+                        : 'border-pink-200'
+                    ]">
+                    <span v-if="isObserverMode && room.currentBattle?.players?.[0]?.agentName === watchedAgentInfo?.name"
+                      class="absolute -top-2 -right-2 text-[10px] bg-gradient-to-r from-amber-500 to-orange-500 text-white px-2 py-0.5 rounded-full font-black shadow-lg border-2 border-white z-10">👀 YOU</span>
                     <span class="text-3xl">🤖</span>
-                    <span class="font-black text-sm text-rose-600">{{ room.currentBattle?.players?.[0]?.agentName || $t('cybercity.unknown') }}</span>
+                    <span class="font-black text-sm"
+                      :class="isObserverMode && room.currentBattle?.players?.[0]?.agentName === watchedAgentInfo?.name ? 'text-orange-700' : 'text-rose-600'">
+                      {{ room.currentBattle?.players?.[0]?.agentName || $t('cybercity.unknown') }}
+                    </span>
                   </div>
                   <div class="text-2xl font-black text-amber-500 px-4 py-2 bg-amber-50 rounded-2xl border border-amber-200">VS</div>
-                  <div class="flex flex-col items-center gap-2 px-6 py-4 bg-pink-50 border border-pink-200 rounded-2xl min-w-[110px]">
+                  <div class="relative flex flex-col items-center gap-2 px-6 py-4 rounded-2xl min-w-[110px] transition-all duration-300"
+                    :class="[
+                      'bg-pink-50 border-2',
+                      isObserverMode && room.currentBattle?.players?.[1]?.agentName === watchedAgentInfo?.name
+                        ? 'border-orange-500 shadow-xl shadow-orange-300/50 bg-gradient-to-b from-orange-50 to-amber-50 scale-105'
+                        : 'border-pink-200'
+                    ]">
+                    <span v-if="isObserverMode && room.currentBattle?.players?.[1]?.agentName === watchedAgentInfo?.name"
+                      class="absolute -top-2 -right-2 text-[10px] bg-gradient-to-r from-amber-500 to-orange-500 text-white px-2 py-0.5 rounded-full font-black shadow-lg border-2 border-white z-10">👀 YOU</span>
                     <span class="text-3xl">🤖</span>
-                    <span class="font-black text-sm text-rose-600">{{ room.currentBattle?.players?.[1]?.agentName || $t('cybercity.unknown') }}</span>
+                    <span class="font-black text-sm"
+                      :class="isObserverMode && room.currentBattle?.players?.[1]?.agentName === watchedAgentInfo?.name ? 'text-orange-700' : 'text-rose-600'">
+                      {{ room.currentBattle?.players?.[1]?.agentName || $t('cybercity.unknown') }}
+                    </span>
                   </div>
                 </div>
                 <p class="text-pink-400/70 text-sm animate-pulse">{{ $t('cybercity.calculating') }}</p>
@@ -133,7 +168,11 @@
                 </div>
 
                 <!-- Position results -->
-                <div class="grid grid-cols-3 gap-3 w-full mt-2">
+                <div class="grid grid-cols-3 gap-3 w-full mt-2"
+                  :class="isObserverMode && (room.currentBattle?.winnerName === watchedAgentInfo?.name || 
+                    (room.currentBattle?.players?.[0]?.agentName === watchedAgentInfo?.name && room.currentBattle?.winner === room.currentBattle?.players?.[0]?.agentId) ||
+                    (room.currentBattle?.players?.[1]?.agentName === watchedAgentInfo?.name && room.currentBattle?.winner === room.currentBattle?.players?.[1]?.agentId))
+                    ? 'p-3 rounded-2xl border-2 border-orange-400 bg-gradient-to-r from-orange-50 to-amber-50 shadow-lg shadow-orange-200/50' : ''">
                   <div v-for="(posKey, idx) in ['positionA', 'positionB', 'positionC']" :key="posKey"
                     class="border rounded-xl p-3 text-center transition-all"
                     :class="room.currentBattle?.positionResults?.[posKey]?.winner ? 'border-amber-300 bg-amber-50' : 'border-pink-100 bg-white/60'"
@@ -196,32 +235,58 @@
           </div>
           <div v-else class="flex flex-col gap-5">
             <div v-for="battle in [...room.history].reverse()" :key="battle.battleId"
-              class="rounded-2xl border-2 overflow-hidden"
-              :class="battle.winner ? 'border-pink-100' : 'border-pink-50'"
+              class="rounded-2xl border-2 overflow-hidden transition-all duration-300"
+              :class="[
+                battle.winner ? 'border-pink-100' : 'border-pink-50',
+                isObserverMode && (battle.player1?.agentName === watchedAgentInfo?.name || battle.player2?.agentName === watchedAgentInfo?.name)
+                  ? 'border-orange-500 shadow-lg shadow-orange-300/50' : ''
+              ]"
             >
-              <!-- 对战头部：双方玩家 + 结果 -->
-              <div class="flex items-center justify-between px-4 py-3"
-                :class="battle.winner ? 'bg-gradient-to-r from-rose-50 to-pink-50' : 'bg-pink-50/50'"
+               <!-- 对战头部：双方玩家 + 结果 -->
+               <div class="flex items-center justify-between px-4 py-3 relative"
+                :class="[
+                  battle.winner ? 'bg-gradient-to-r from-rose-50 to-pink-50' : 'bg-pink-50/50',
+                  isObserverMode && (battle.player1?.agentName === watchedAgentInfo?.name || battle.player2?.agentName === watchedAgentInfo?.name)
+                    ? '!bg-gradient-to-r from-orange-300 via-amber-300 to-orange-300 border-b-2 border-orange-500' : ''
+                ]"
               >
                 <div class="flex items-center gap-2 flex-wrap">
                   <!-- 玩家1 -->
-                  <div class="flex items-center gap-1.5">
-                    <span v-if="battle.winner === battle.player1?.agentId?.toString() || battle.winnerName === battle.player1?.agentName"
-                      class="text-[10px] font-black text-white bg-amber-400 px-1.5 py-0.5 rounded">🏆</span>
-                    <span class="font-black text-sm"
-                      :class="(battle.winner === battle.player1?.agentId?.toString() || battle.winnerName === battle.player1?.agentName) ? 'text-emerald-600' : 'text-pink-500'">
-                      {{ battle.player1?.agentName }}
-                    </span>
+                  <div class="flex items-center gap-2">
+                    <div v-if="battle.winner === battle.player1?.agentId?.toString() || battle.winnerName === battle.player1?.agentName"
+                      class="relative">
+                      <div class="w-8 h-8 flex items-center justify-center bg-gradient-to-br from-amber-300 via-yellow-300 to-amber-400 rounded-full shadow-lg shadow-amber-400/40">
+                        <span class="text-base drop-shadow-sm">🏆</span>
+                      </div>
+                      <div class="absolute inset-0 w-8 h-8 rounded-full border-2 border-amber-400/30 animate-pulse"></div>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="font-black text-sm"
+                        :class="(battle.winner === battle.player1?.agentId?.toString() || battle.winnerName === battle.player1?.agentName) ? 'text-emerald-600' : 'text-pink-500'">
+                        {{ battle.player1?.agentName }}
+                      </span>
+                      <span v-if="isObserverMode && battle.player1?.agentName === watchedAgentInfo?.name"
+                        class="text-[10px] bg-gradient-to-r from-amber-500 to-orange-500 text-white px-2 py-0.5 rounded-full font-black shadow-sm">👀 YOU</span>
+                    </div>
                   </div>
-                  <span class="text-xs font-black text-pink-300 px-2 py-0.5 bg-pink-100 rounded-full">VS</span>
+                  <span class="text-xs font-black px-2 py-0.5 rounded-full bg-pink-100 text-pink-300">VS</span>
                   <!-- 玩家2 -->
-                  <div class="flex items-center gap-1.5">
-                    <span v-if="battle.winner === battle.player2?.agentId?.toString() || battle.winnerName === battle.player2?.agentName"
-                      class="text-[10px] font-black text-white bg-amber-400 px-1.5 py-0.5 rounded">🏆</span>
-                    <span class="font-black text-sm"
-                      :class="(battle.winner === battle.player2?.agentId?.toString() || battle.winnerName === battle.player2?.agentName) ? 'text-emerald-600' : 'text-pink-500'">
-                      {{ battle.player2?.agentName }}
-                    </span>
+                  <div class="flex items-center gap-2">
+                    <div v-if="battle.winner === battle.player2?.agentId?.toString() || battle.winnerName === battle.player2?.agentName"
+                      class="relative">
+                      <div class="w-8 h-8 flex items-center justify-center bg-gradient-to-br from-amber-300 via-yellow-300 to-amber-400 rounded-full shadow-lg shadow-amber-400/40">
+                        <span class="text-base drop-shadow-sm">🏆</span>
+                      </div>
+                      <div class="absolute inset-0 w-8 h-8 rounded-full border-2 border-amber-400/30 animate-pulse"></div>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="font-black text-sm"
+                        :class="(battle.winner === battle.player2?.agentId?.toString() || battle.winnerName === battle.player2?.agentName) ? 'text-emerald-600' : 'text-pink-500'">
+                        {{ battle.player2?.agentName }}
+                      </span>
+                      <span v-if="isObserverMode && battle.player2?.agentName === watchedAgentInfo?.name"
+                        class="text-[10px] bg-gradient-to-r from-amber-500 to-orange-500 text-white px-2 py-0.5 rounded-full font-black shadow-sm">👀 YOU</span>
+                    </div>
                   </div>
                 </div>
                 <!-- 右侧：奖励 -->
@@ -236,7 +301,9 @@
               </div>
 
               <!-- 三阵地详情 -->
-              <div class="grid grid-cols-3 divide-x divide-pink-100">
+              <div class="grid grid-cols-3 divide-x divide-pink-100"
+                :class="isObserverMode && (battle.player1?.agentName === watchedAgentInfo?.name || battle.player2?.agentName === watchedAgentInfo?.name)
+                  ? 'divide-orange-300 bg-orange-100/60' : ''">
                 <div v-for="pos in [
                     { key: 'positionA', emoji: '🐼', label: $t('cybercity.positionA') },
                     { key: 'positionB', emoji: '🐵', label: $t('cybercity.positionB') },
@@ -244,14 +311,20 @@
                   ]"
                   :key="pos.key"
                   class="flex flex-col items-center gap-1 px-3 py-3 text-center"
-                  :class="battle.positionResults?.[pos.key]?.winner ? 'bg-amber-50/60' : 'bg-white/40'"
+                  :class="[
+                    battle.positionResults?.[pos.key]?.winner ? 'bg-amber-50/60' : 'bg-white/40',
+                    isObserverMode && (battle.player1?.agentName === watchedAgentInfo?.name || battle.player2?.agentName === watchedAgentInfo?.name)
+                      ? (battle.positionResults?.[pos.key]?.winner ? '!bg-violet-50/80' : 'bg-violet-50/30') : ''
+                  ]"
                 >
                   <!-- 阵地图标 + 名称 -->
                   <span class="text-xl">{{ pos.emoji }}</span>
                   <span class="text-[10px] font-bold text-violet-500 leading-tight">{{ pos.label }}</span>
 
                   <!-- 双方兵力对比 -->
-                  <div class="flex items-center gap-1.5 mt-1">
+                  <div class="flex items-center gap-1.5 mt-1 px-2 py-1 rounded-lg transition-all"
+                    :class="isObserverMode && (battle.player1?.agentName === watchedAgentInfo?.name || battle.player2?.agentName === watchedAgentInfo?.name)
+                      ? 'bg-orange-300 shadow-inner' : ''">
                     <!-- 玩家1的兵力 -->
                     <span class="text-sm font-black w-8 text-right"
                       :class="{
@@ -273,7 +346,9 @@
 
                   <!-- 阵地胜者 -->
                   <div class="text-[10px] font-black leading-tight mt-0.5">
-                    <span v-if="battle.positionResults?.[pos.key]?.winnerName" class="text-amber-600">
+                    <span v-if="battle.positionResults?.[pos.key]?.winnerName"
+                      :class="isObserverMode && (battle.player1?.agentName === watchedAgentInfo?.name || battle.player2?.agentName === watchedAgentInfo?.name)
+                        ? 'text-orange-800' : 'text-amber-600'">
                       ✓ {{ battle.positionResults[pos.key].winnerName }}
                     </span>
                     <span v-else class="text-slate-400">—</span>
@@ -282,7 +357,10 @@
               </div>
 
               <!-- 获胜原因 -->
-              <div v-if="battle.winReason" class="px-4 py-2 bg-pink-50/50 border-t border-pink-100 text-[11px] text-pink-400 font-semibold flex items-center gap-1.5">
+              <div v-if="battle.winReason" class="px-4 py-2 text-[11px] font-semibold flex items-center gap-1.5"
+                :class="isObserverMode && (battle.player1?.agentName === watchedAgentInfo?.name || battle.player2?.agentName === watchedAgentInfo?.name)
+                  ? 'bg-orange-100 border-t border-orange-300 text-orange-700'
+                  : 'bg-pink-50/50 border-t border-pink-100 text-pink-400'">
                 <span>💡</span><span>{{ battle.winReason }}</span>
               </div>
             </div>
@@ -329,6 +407,19 @@ const roomId = computed(() => Number(route.params.id))
 const room = ref<any>(null)
 const loading = ref(true)
 const now = ref(Date.now())
+const watchedAgentInfo = ref<any>(null)
+
+async function fetchWatchedAgent() {
+  if (!isObserverMode.value) return
+  try {
+    const data = await $fetch('/api/agent/info', {
+      query: { token: observerToken.value }
+    })
+    watchedAgentInfo.value = data
+  } catch (e) {
+    console.error('Failed to fetch watched agent info', e)
+  }
+}
 
 const statusLabel = computed(() => {
   const labels: Record<string, string> = {
@@ -376,6 +467,7 @@ let tickTimer: ReturnType<typeof setInterval>
 
 onMounted(async () => {
   await fetchRoom()
+  await fetchWatchedAgent()
   loading.value = false
 
   fetchTimer = setInterval(fetchRoom, 3000)

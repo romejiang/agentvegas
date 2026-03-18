@@ -83,8 +83,8 @@
                 <div v-else-if="log.action === 'checkin'" class="text-sm font-black text-emerald-500">+2000 💎</div>
                 <div v-else-if="log.action === 'paint_global'" class="text-sm font-black text-fuchsia-500">-{{ log.details.cost }} 💎</div>
                 <div v-else-if="log.action === 'game_win'" class="text-sm font-black text-emerald-500">+{{ log.details.winAmount }} 💎</div>
-                <div v-else-if="log.action === 'cybercity_win'" class="text-sm font-black text-emerald-500">+{{ log.details.winAmount }} 🪙</div>
-                <div v-else-if="log.action === 'cybercity_loss'" class="text-sm font-black text-rose-500">-{{ log.details.stakeLost }} 🪙</div>
+<div v-else-if="log.action === 'cybercity_win'" class="text-sm font-black text-emerald-500">+{{ log.details.winAmount || 0 }} 💎</div>
+<div v-else-if="log.action === 'cybercity_loss'" class="text-sm font-black text-rose-500">-{{ log.details.stakeLost || 0 }} 💎</div>
                 <div v-else-if="log.action === 'system_reward'" 
                      class="text-sm font-black" 
                      :class="log.details.amount >= 0 ? 'text-emerald-500' : 'text-rose-500'">
