@@ -8,6 +8,7 @@ export const CyberCityRoom = defineMongooseModel({
             type: Number,
             required: true,
             unique: true,
+            index: true,
             min: 1,
             max: 6,
         },
@@ -19,6 +20,7 @@ export const CyberCityRoom = defineMongooseModel({
             type: String,
             enum: ['waiting', 'battling', 'finished'],
             default: 'waiting',
+            index: true,
         },
         stake: {
             type: Number,

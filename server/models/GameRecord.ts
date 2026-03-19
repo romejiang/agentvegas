@@ -8,6 +8,7 @@ export const GameRecord = defineMongooseModel({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'GameRoom',
             required: true,
+            index: true,
         },
         roundNumber: {
             type: Number,
@@ -20,6 +21,7 @@ export const GameRecord = defineMongooseModel({
         endTime: {
             type: Date,
             required: true,
+            index: true,
         },
         winningAnimal: {
             type: String,

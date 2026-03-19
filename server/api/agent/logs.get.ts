@@ -21,6 +21,7 @@ export default defineEventHandler(async (event) => {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(pageSize + 1) // Fetch one extra to check if there's more
+        .select('agentId action description createdAt')
 
     const hasMore = logs.length > pageSize
     const results = hasMore ? logs.slice(0, pageSize) : logs

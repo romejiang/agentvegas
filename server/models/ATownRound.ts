@@ -8,15 +8,18 @@ export const ATownRound = defineMongooseModel({
             type: Number,
             required: true,
             unique: true,
+            index: true,
         },
         status: {
             type: String,
             enum: ['waiting', 'calculating', 'resolved'],
             default: 'waiting',
+            index: true,
         },
         startTime: {
             type: Date,
             required: true,
+            index: true,
         },
         endTime: {
             type: Date,

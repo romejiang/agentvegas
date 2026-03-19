@@ -79,30 +79,23 @@ class CyberCityEngine {
     }
 
     async getRoomsStatus() {
-        const rooms = await CyberCityRoom.find().sort({ roomId: 1 })
+        const rooms = await CyberCityRoom.find()
+            .sort({ roomId: 1 })
+            .select('roomId name status stake currentBattle')
+            .lean()
         const roomsArray = []
 
         for (const room of rooms) {
             this.rooms.set(room.roomId as number, room)
 
             const currentBattle = room.currentBattle as any
-            // Mongoose 嵌套对象即使 DB 里为 null，读出来也是空对象 {}，必须用 battleId 判断真实状态
             const battleInfo = currentBattle?.battleId ? {
                 battleId: currentBattle.battleId,
                 startTime: currentBattle.startTime,
                 playerCount: currentBattle.players?.length || 0,
-                players: room.status === 'finished'
-                    ? (currentBattle.players || []).map((p: any) => ({
-                        agentName: p.agentName,
-                        allocation: p.allocation,
-                    }))
-                    : (currentBattle.players || []).map((p: any) => ({
-                        agentName: p.agentName,
-                        allocation: null,
-                    })),
-                winner: currentBattle.winnerName,
-                winReason: currentBattle.winReason,
-                positionResults: room.status === 'finished' ? currentBattle.positionResults : null,
+                players: (currentBattle.players || []).slice(0, 1).map((p: any) => ({
+                    agentName: p.agentName,
+                })),
             } : null
 
             roomsArray.push({

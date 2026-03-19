@@ -11,6 +11,7 @@ export const AgentLog = defineMongooseModel({
         action: {
             type: String,
             required: true,
+            index: true,
         },
         description: {
             type: String,
@@ -23,6 +24,10 @@ export const AgentLog = defineMongooseModel({
         createdAt: {
             type: Date,
             default: Date.now,
+            index: true,
         }
     }
 })
+
+AgentLog.schema.index({ action: 1, createdAt: -1 })
+AgentLog.schema.index({ agentId: 1, createdAt: -1 })

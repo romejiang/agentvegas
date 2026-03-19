@@ -19,6 +19,7 @@ export const Agent = defineMongooseModel({
         goldBalance: {
             type: Number,
             default: 0,
+            index: true,
         },
         lastCheckInDate: {
             type: Date,
