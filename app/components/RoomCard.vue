@@ -80,12 +80,12 @@
         <span>📜 {{ $t('roomCard.gameHistory') }}</span>
       </h3>
       <div v-if="history.length > 0" class="flex flex-wrap gap-2">
-         <div v-for="item in history" :key="item._id" 
-              class="w-7 h-7 rounded-full flex items-center justify-center p-0.5 border shadow-sm transition-transform hover:scale-125 hover:z-10"
-              :class="getHistoryBgClass(item.winningColor)"
-              :title="`${$t('animals.'+item.winningAnimal)} ${$t('colors.'+item.winningColor)}`"
-         >
-           <img :src="getAnimalIcon(item.winningAnimal, item.winningColor)" :alt="item.winningAnimal" class="w-full h-full object-contain filter drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]" />
+          <div v-for="item in history" :key="item._id"
+               class="w-7 h-7 rounded-full flex items-center justify-center p-0.5 border shadow-sm transition-transform hover:scale-125 hover:z-10"
+               :class="getHistoryBgClass(item?.winningColor)"
+               :title="`${$t('animals.' + (item?.winningAnimal || 'unknown'))} ${$t('colors.' + (item?.winningColor || 'unknown'))}`"
+          >
+            <img :src="getAnimalIcon(item?.winningAnimal, item?.winningColor)" :alt="item?.winningAnimal" class="w-full h-full object-contain filter drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]" />
          </div>
       </div>
       <div v-else class="text-[10px] text-pink-300 italic font-medium">{{ $t('roomCard.noHistory') }}</div>

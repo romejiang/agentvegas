@@ -79,19 +79,19 @@
 
              <!-- Detail Highlight (like amounts) -->
              <div class="text-right flex-shrink-0 pl-4" v-if="['bet', 'checkin', 'paint_global', 'game_win', 'system_reward', 'cybercity_win', 'cybercity_loss'].includes(log.action)">
-                <div v-if="log.action === 'bet'" class="text-sm font-black text-rose-500">-{{ log.details.amount }} 💎</div>
+                <div v-if="log.action === 'bet' && log.details?.amount" class="text-sm font-black text-rose-500">-{{ log.details?.amount }} 💎</div>
                 <div v-else-if="log.action === 'checkin'" class="text-sm font-black text-emerald-500">+2000 💎</div>
-                <div v-else-if="log.action === 'paint_global'" class="text-sm font-black text-fuchsia-500">-{{ log.details.cost }} 💎</div>
-                <div v-else-if="log.action === 'game_win'" class="text-sm font-black text-emerald-500">+{{ log.details.winAmount }} 💎</div>
-<div v-else-if="log.action === 'cybercity_win'" class="text-sm font-black text-emerald-500">+{{ log.details.winAmount || 0 }} 💎</div>
-<div v-else-if="log.action === 'cybercity_loss'" class="text-sm font-black text-rose-500">-{{ log.details.stakeLost || 0 }} 💎</div>
-                <div v-else-if="log.action === 'system_reward'" 
-                     class="text-sm font-black" 
-                     :class="log.details.amount >= 0 ? 'text-emerald-500' : 'text-rose-500'">
-                  {{ log.details.amount >= 0 ? '+' : '' }}{{ log.details.amount }} 💎
+                <div v-else-if="log.action === 'paint_global' && log.details?.cost" class="text-sm font-black text-fuchsia-500">-{{ log.details?.cost }} 💎</div>
+                <div v-else-if="log.action === 'game_win' && log.details?.winAmount" class="text-sm font-black text-emerald-500">+{{ log.details?.winAmount }} 💎</div>
+                <div v-else-if="log.action === 'cybercity_win' && log.details?.winAmount" class="text-sm font-black text-emerald-500">+{{ log.details?.winAmount }} 💎</div>
+                <div v-else-if="log.action === 'cybercity_loss' && log.details?.stakeLost" class="text-sm font-black text-rose-500">-{{ log.details?.stakeLost }} 💎</div>
+                <div v-else-if="log.action === 'system_reward' && log.details?.amount !== undefined"
+                     class="text-sm font-black"
+                     :class="log.details?.amount >= 0 ? 'text-emerald-500' : 'text-rose-500'">
+                  {{ log.details?.amount >= 0 ? '+' : '' }}{{ log.details?.amount }} 💎
                 </div>
-               
-                <div v-if="log.details.newBalance !== undefined" class="text-[10px] text-gray-400 font-bold mt-1">{{ $t('agentLogsPage.balance') }}: {{ log.details.newBalance }}</div>
+                
+                <div v-if="log.details?.newBalance !== undefined" class="text-[10px] text-gray-400 font-bold mt-1">{{ $t('agentLogsPage.balance') }}: {{ log.details?.newBalance }}</div>
              </div>
           </div>
         </div>

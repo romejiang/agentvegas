@@ -195,23 +195,23 @@
                 <template v-if="log.action === 'bet'">
                   <span class="text-pink-600 font-bold text-base">@{{ log.agentName || 'Unknown Agent' }}</span>
                   {{ $t('roomDetail.atText') }} <span class="text-fuchsia-500 font-bold">{{ room.name }}</span> 
-                  {{ $t('roomDetail.betText') }} <span class="text-amber-500 font-black">{{ log.details.amount }}</span> 
+                  {{ $t('roomDetail.betText') }} <span class="text-amber-500 font-black">{{ log.details?.amount }}</span> 
                   {{ $t('roomDetail.goldText') }} 
-                  <span :class="getTextColorClass(log.details.color)" class="font-extrabold text-base">{{ $t('colors.' + log.details.color) }}{{ $t('animals.' + log.details.animal) }}</span>
+                  <span :class="getTextColorClass(log.details?.color)" class="font-extrabold text-base">{{ $t('colors.' + log.details?.color) }}{{ $t('animals.' + log.details?.animal) }}</span>
                 </template>
                 <template v-else-if="log.action === 'game_win'">
                   <span class="text-pink-600 font-bold text-base">@{{ log.agentName || 'Unknown Agent' }}</span>
                   <span class="text-emerald-500 font-bold px-1">{{ $t('roomDetail.wonText') }}</span>
-                  <span class="text-emerald-500 font-black text-base">+{{ log.details.winAmount }}</span> 
+                  <span class="text-emerald-500 font-black text-base">+{{ log.details?.winAmount }}</span> 
                   <span class="text-emerald-500 font-bold ml-1">{{ $t('roomDetail.goldTextWin') }}</span>
-                  <span class="text-slate-500 text-xs ml-2">({{ $t('roomDetail.betOn') }} <span :class="getTextColorClass(log.details.betColor)" class="font-bold">{{ $t('colors.' + log.details.betColor) }}{{ $t('animals.' + log.details.betAnimal) }}</span>)</span>
+                  <span class="text-slate-500 text-xs ml-2">({{ $t('roomDetail.betOn') }} <span :class="getTextColorClass(log.details?.betColor)" class="font-bold">{{ $t('colors.' + log.details?.betColor) }}{{ $t('animals.' + log.details?.betAnimal) }}</span>)</span>
                 </template>
                 <template v-else-if="log.action === 'game_loss'">
                   <span class="text-pink-600 font-bold text-base">@{{ log.agentName || 'Unknown Agent' }}</span>
                   <span class="text-slate-500 font-bold px-1">{{ $t('roomDetail.lostText') }}</span>
-                  <span class="text-slate-500 font-black text-base">-{{ log.details.betAmount }}</span> 
+                  <span class="text-slate-500 font-black text-base">-{{ log.details?.betAmount }}</span> 
                   <span class="text-slate-500 font-bold ml-1">{{ $t('roomDetail.goldTextLoss') }}</span>
-                  <span class="text-slate-400 text-xs ml-2">({{ $t('roomDetail.betOn') }} <span :class="getTextColorClass(log.details.betColor)" class="font-bold">{{ $t('colors.' + log.details.betColor) }}{{ $t('animals.' + log.details.betAnimal) }}</span>)</span>
+                  <span class="text-slate-400 text-xs ml-2">({{ $t('roomDetail.betOn') }} <span :class="getTextColorClass(log.details?.betColor)" class="font-bold">{{ $t('colors.' + log.details?.betColor) }}{{ $t('animals.' + log.details?.betAnimal) }}</span>)</span>
                 </template>
               </div>
               <div class="text-xs text-slate-400 mt-0.5 whitespace-nowrap">
